@@ -213,7 +213,7 @@ const Index = () => {
               </p>
             </div>
           ) : (
-            <div className="flex w-full flex-col items-center gap-5">
+            <div className="flex w-full flex-col items-center gap-4">
               <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
 
               <SubjectSelector

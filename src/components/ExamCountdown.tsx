@@ -34,7 +34,7 @@ export function ExamCountdown({ exams, onAdd, onRemove }: ExamCountdownProps) {
   };
 
   return (
-    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-3">
       <div className="flex items-center justify-between">
         <button onClick={toggleCollapsed} className="flex items-center gap-2 group">
           {collapsed ? (
