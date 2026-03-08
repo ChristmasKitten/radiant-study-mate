@@ -108,60 +108,68 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
       {!hideChrome && (
-        <div className="mb-6 flex w-full max-w-md items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-              <BookOpen className="h-4 w-4 text-primary" />
+        <header className="mb-6 flex w-full max-w-md flex-col gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <BookOpen className="h-4 w-4 text-primary" />
+              </div>
+              <h1 className="truncate text-xl font-bold tracking-tight text-foreground">
+                Study<span className="text-primary">Flow</span>
+              </h1>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Study<span className="text-primary">Flow</span>
-            </h1>
+
+            <div className="flex items-center gap-0.5">
+              <GamificationBar
+                xp={gamification.xp}
+                level={gamification.level}
+                levelProgress={gamification.levelProgress}
+                xpInCurrentLevel={gamification.xpInCurrentLevel}
+                xpNeededForNext={gamification.xpNeededForNext}
+                currentStreak={gamification.currentStreak}
+                longestStreak={gamification.longestStreak}
+                totalSessions={gamification.totalSessions}
+                unlockedBadges={gamification.unlockedBadges}
+                lockedBadges={gamification.lockedBadges}
+                newBadges={gamification.newBadges}
+                onClearNewBadges={gamification.clearNewBadges}
+              />
+              <AmbientMusic />
+              <SettingsPanel
+                durations={timer.customDurations}
+                onDurationsChange={timer.setCustomDurations}
+                colorTheme={colorTheme}
+                onColorChange={setColor}
+                disabled={false}
+                catVisible={catVisible}
+                onCatToggle={setCatVisible}
+              />
+              <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+            </div>
           </div>
 
-          <div className="flex items-center gap-0.5">
-            <GamificationBar
-              xp={gamification.xp}
-              level={gamification.level}
-              levelProgress={gamification.levelProgress}
-              xpInCurrentLevel={gamification.xpInCurrentLevel}
-              xpNeededForNext={gamification.xpNeededForNext}
-              currentStreak={gamification.currentStreak}
-              longestStreak={gamification.longestStreak}
-              totalSessions={gamification.totalSessions}
-              unlockedBadges={gamification.unlockedBadges}
-              lockedBadges={gamification.lockedBadges}
-              newBadges={gamification.newBadges}
-              onClearNewBadges={gamification.clearNewBadges}
-            />
-
+          <div className="flex items-center justify-center gap-1 rounded-full bg-secondary/70 p-1">
             {[
-              { key: "analytics" as View, icon: BarChart3 },
-              { key: "report" as View, icon: FileText },
-              { key: "schedule" as View, icon: CalendarDays },
-            ].map(({ key, icon: Icon }) => (
-              <Button
-                key={key}
-                variant="ghost"
-                size="icon"
-                onClick={() => setView((v) => (v === key ? "timer" : key))}
-                className={`h-8 w-8 rounded-full ${view === key ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </Button>
-            ))}
-            <AmbientMusic />
-            <SettingsPanel
-              durations={timer.customDurations}
-              onDurationsChange={timer.setCustomDurations}
-              colorTheme={colorTheme}
-              onColorChange={setColor}
-              disabled={false}
-              catVisible={catVisible}
-              onCatToggle={setCatVisible}
-            />
-            <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+              { key: "analytics" as View, icon: BarChart3, label: "Analytics" },
+              { key: "report" as View, icon: FileText, label: "Report" },
+              { key: "schedule" as View, icon: CalendarDays, label: "Schedule" },
+            ].map(({ key, icon: Icon, label }) => {
+              const isActive = view === key;
+              return (
+                <Button
+                  key={key}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setView((v) => (v === key ? "timer" : key))}
+                  className={`h-8 rounded-full px-3 text-xs ${isActive ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Icon className="mr-1.5 h-3.5 w-3.5" />
+                  {label}
+                </Button>
+              );
+            })}
           </div>
-        </div>
+        </header>
       )}
 
       {view === "analytics" && (
