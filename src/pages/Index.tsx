@@ -116,7 +116,7 @@ const Index = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <GamificationBar
               xp={gamification.xp}
               level={gamification.level}
@@ -127,31 +127,21 @@ const Index = () => {
               longestStreak={gamification.longestStreak}
             />
 
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView((v) => (v === "analytics" ? "timer" : "analytics"))}
-              className={`h-9 w-9 rounded-full ${view === "analytics" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <BarChart3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView((v) => (v === "report" ? "timer" : "report"))}
-              className={`h-9 w-9 rounded-full ${view === "report" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <FileText className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView((v) => (v === "schedule" ? "timer" : "schedule"))}
-              className={`h-9 w-9 rounded-full ${view === "schedule" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <CalendarDays className="h-4 w-4" />
-            </Button>
+            {[
+              { key: "analytics" as View, icon: BarChart3 },
+              { key: "report" as View, icon: FileText },
+              { key: "schedule" as View, icon: CalendarDays },
+            ].map(({ key, icon: Icon }) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="icon"
+                onClick={() => setView((v) => (v === key ? "timer" : key))}
+                className={`h-8 w-8 rounded-full ${view === key ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </Button>
+            ))}
             <AmbientMusic />
             <SettingsPanel
               durations={timer.customDurations}

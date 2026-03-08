@@ -67,12 +67,12 @@ export function SubjectSelector({
               <div key={subject} className="group relative">
                 <button
                   onClick={() => !disabled && onSelect(subject)}
-                  className={`flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                  className={`flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
                     isActive && color && color !== "none"
-                      ? "border-transparent text-primary-foreground"
+                      ? "border-transparent text-primary-foreground scale-105"
                       : isActive
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      ? "border-primary bg-primary text-primary-foreground scale-105"
+                      : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80 scale-100"
                   } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   style={isActive && color && color !== "none" ? { backgroundColor: color } : undefined}
                   type="button"
