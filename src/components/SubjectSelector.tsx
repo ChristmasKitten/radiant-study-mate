@@ -158,7 +158,7 @@ export function SubjectSelector({
           )}
         </div>
 
-        {disabled && <p className="text-[10px] text-muted-foreground">Subject is locked while timer is running.</p>}
+        
       </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
