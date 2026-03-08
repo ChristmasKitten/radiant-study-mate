@@ -35,22 +35,32 @@ export function ExamCountdown({ exams, onAdd, onRemove }: ExamCountdownProps) {
 
   return (
     <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <button onClick={toggleCollapsed} className="flex items-center gap-2 group">
+          {collapsed ? (
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
+          )}
           <CalendarClock className="h-4 w-4 text-primary" />
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Exam Countdown</p>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 rounded-full text-muted-foreground hover:text-primary"
-          onClick={() => setAdding(!adding)}
-        >
-          {adding ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-        </Button>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Exam Countdown {exams.length > 0 && `(${exams.length})`}
+          </p>
+        </button>
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-full text-muted-foreground hover:text-primary"
+            onClick={() => setAdding(!adding)}
+          >
+            {adding ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          </Button>
+        )}
       </div>
 
-      <AnimatePresence>
+      {!collapsed && (
+        <div className="mt-3">
         {adding && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
