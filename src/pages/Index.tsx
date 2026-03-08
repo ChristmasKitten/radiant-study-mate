@@ -1,111 +1,139 @@
-import { motion } from "framer-motion";
-import { BookOpen } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, BarChart3 } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
+import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";
 import { SessionStats } from "@/components/SessionStats";
 import { SubjectSelector } from "@/components/SubjectSelector";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { AnalyticsPanel } from "@/components/AnalyticsPanel";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const timer = useStudyTimer();
+  const { isDark, toggle: toggleTheme } = useThemeToggle();
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-8 selection:bg-primary/30">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 flex items-center gap-3"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-          <BookOpen className="h-5 w-5 text-primary" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Study<span className="text-primary">Flow</span>
-        </h1>
-      </motion.div>
+    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
+      {/* Top bar */}
+      <div className="flex w-full max-w-md items-center justify-between mb-6">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-2.5"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+            <BookOpen className="h-4 w-4 text-primary" />
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Study<span className="text-primary">Flow</span>
+          </h1>
+        </motion.div>
 
-      {/* Mode Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="mb-6"
-      >
-        <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-1"
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowAnalytics((p) => !p)}
+            className={`h-9 w-9 rounded-full ${showAnalytics ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <BarChart3 className="h-4 w-4" />
+          </Button>
+          <SettingsPanel
+            durations={timer.customDurations}
+            onDurationsChange={timer.setCustomDurations}
+            disabled={timer.isRunning}
+          />
+          <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
+        </motion.div>
+      </div>
 
-      {/* Subject Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-        className="mb-8"
-      >
-        <SubjectSelector
-          subjects={timer.subjects}
-          currentSubject={timer.currentSubject}
-          onSelect={timer.setCurrentSubject}
-          onAdd={timer.addSubject}
-          onRemove={timer.removeSubject}
-          disabled={timer.isRunning}
-        />
-      </motion.div>
+      <AnimatePresence mode="wait">
+        {showAnalytics ? (
+          <motion.div
+            key="analytics"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full flex flex-col items-center"
+          >
+            <AnalyticsPanel
+              dailyRecords={timer.dailyRecords}
+              last7Days={timer.last7Days}
+              bestDayRecord={timer.bestDayRecord}
+              avgDailyTime={timer.avgDailyTime}
+              allTimeTotalSeconds={timer.allTimeTotalSeconds}
+              subjectTimes={timer.subjectTimes}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="timer"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex flex-col items-center w-full"
+          >
+            {/* Mode Selector */}
+            <div className="mb-5">
+              <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
+            </div>
 
-      {/* Timer */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, type: "spring", bounce: 0.3 }}
-        className="mb-8"
-      >
-        <CircularTimer
-          timeLeft={timer.timeLeft}
-          progress={timer.progress}
-          mode={timer.mode}
-          isRunning={timer.isRunning}
-        />
-      </motion.div>
+            {/* Subject Selector */}
+            <div className="mb-7">
+              <SubjectSelector
+                subjects={timer.subjects}
+                currentSubject={timer.currentSubject}
+                onSelect={timer.setCurrentSubject}
+                onAdd={timer.addSubject}
+                onRemove={timer.removeSubject}
+                disabled={timer.isRunning}
+              />
+            </div>
 
-      {/* Controls */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mb-10"
-      >
-        <TimerControls
-          isRunning={timer.isRunning}
-          onStart={timer.start}
-          onPause={timer.pause}
-          onReset={timer.reset}
-        />
-      </motion.div>
+            {/* Timer */}
+            <div className="mb-7">
+              <CircularTimer
+                timeLeft={timer.timeLeft}
+                progress={timer.progress}
+                mode={timer.mode}
+                isRunning={timer.isRunning}
+              />
+            </div>
 
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="w-full max-w-md"
-      >
-        <SessionStats
-          sessionsCompleted={timer.sessionsCompleted}
-          totalFocusTime={timer.totalFocusTime}
-          allTimeTotalSeconds={timer.allTimeTotalSeconds}
-          subjectTimes={timer.subjectTimes}
-        />
-      </motion.div>
+            {/* Controls */}
+            <div className="mb-8">
+              <TimerControls
+                isRunning={timer.isRunning}
+                onStart={timer.start}
+                onPause={timer.pause}
+                onReset={timer.reset}
+              />
+            </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="mt-6 text-xs text-muted-foreground/50"
-      >
-        4 focus sessions → long break • Data saved locally
-      </motion.p>
+            {/* Stats */}
+            <SessionStats
+              sessionsCompleted={timer.sessionsCompleted}
+              totalFocusTime={timer.totalFocusTime}
+              allTimeTotalSeconds={timer.allTimeTotalSeconds}
+              bestDaySeconds={timer.bestDayRecord?.totalSeconds ?? 0}
+            />
+
+            <p className="mt-6 text-xs text-muted-foreground/50">
+              {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
