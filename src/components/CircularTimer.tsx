@@ -64,11 +64,9 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
         <span className="text-sm text-muted-foreground mt-2 capitalize">
           {mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break"}
         </span>
-        {isRunning && (
-          <span className="text-xs text-muted-foreground mt-1">
-            ends at {getEndTime(timeLeft)}
-          </span>
-        )}
+        <span className="text-xs text-muted-foreground mt-1">
+          {isRunning ? `ends at ${getEndTime(timeLeft)}` : "paused"}
+        </span>
       </div>
     </div>
   );
