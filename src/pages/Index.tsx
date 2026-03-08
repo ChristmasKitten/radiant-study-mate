@@ -5,17 +5,18 @@ import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";
 import { SessionStats } from "@/components/SessionStats";
+import { SubjectSelector } from "@/components/SubjectSelector";
 
 const Index = () => {
   const timer = useStudyTimer();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 selection:bg-primary/30">
+    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-8 selection:bg-primary/30">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-10 flex items-center gap-3"
+        className="mb-8 flex items-center gap-3"
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
           <BookOpen className="h-5 w-5 text-primary" />
@@ -30,9 +31,26 @@ const Index = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mb-10"
+        className="mb-6"
       >
         <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
+      </motion.div>
+
+      {/* Subject Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="mb-8"
+      >
+        <SubjectSelector
+          subjects={timer.subjects}
+          currentSubject={timer.currentSubject}
+          onSelect={timer.setCurrentSubject}
+          onAdd={timer.addSubject}
+          onRemove={timer.removeSubject}
+          disabled={timer.isRunning}
+        />
       </motion.div>
 
       {/* Timer */}
@@ -40,7 +58,7 @@ const Index = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2, type: "spring", bounce: 0.3 }}
-        className="mb-10"
+        className="mb-8"
       >
         <CircularTimer
           timeLeft={timer.timeLeft}
@@ -55,7 +73,7 @@ const Index = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="mb-12"
+        className="mb-10"
       >
         <TimerControls
           isRunning={timer.isRunning}
@@ -70,21 +88,23 @@ const Index = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
+        className="w-full max-w-md"
       >
         <SessionStats
           sessionsCompleted={timer.sessionsCompleted}
           totalFocusTime={timer.totalFocusTime}
+          allTimeTotalSeconds={timer.allTimeTotalSeconds}
+          subjectTimes={timer.subjectTimes}
         />
       </motion.div>
 
-      {/* Subtle hint */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="mt-8 text-xs text-muted-foreground/50"
+        className="mt-6 text-xs text-muted-foreground/50"
       >
-        4 focus sessions → long break
+        4 focus sessions → long break • Data saved locally
       </motion.p>
     </div>
   );
