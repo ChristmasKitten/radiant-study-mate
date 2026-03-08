@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, BarChart3, ListTodo, FileText } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
@@ -20,7 +20,6 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TaskList } from "@/components/TaskList";
-import { MotivationalQuote } from "@/components/MotivationalQuote";
 import { FocusMediaEmbed } from "@/components/FocusMediaEmbed";
 import { GamificationBar } from "@/components/GamificationBar";
 import { ExamCountdown } from "@/components/ExamCountdown";
@@ -48,13 +47,11 @@ const Index = () => {
 
   const prevLevelRef = useRef(gamification.level);
 
-  // Listen for session complete events
   useEffect(() => {
     const handler = () => {
       fireSessionComplete();
       const prevLevel = prevLevelRef.current;
       gamification.awardSessionXP();
-      // Check level up after a tick
       setTimeout(() => {
         if (gamification.level > prevLevel) {
           fireLevelUp();
@@ -70,7 +67,7 @@ const Index = () => {
   const handleStart = () => {
     const quote = getSessionReminderQuote();
     toast({
-      title: "Focus reminder",
+      title: "💪 Let's go!",
       description: `"${quote.text}" — ${quote.author}`,
     });
     timer.start();
@@ -80,24 +77,16 @@ const Index = () => {
     <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
       {!hideChrome && (
         <div className="mb-6 flex w-full max-w-md items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2.5"
-          >
+          <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <BookOpen className="h-4 w-4 text-primary" />
             </div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Study<span className="text-primary">Flow</span>
             </h1>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-1"
-          >
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
@@ -135,7 +124,7 @@ const Index = () => {
               disabled={timer.isRunning}
             />
             <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
-          </motion.div>
+          </div>
         </div>
       )}
 
@@ -143,9 +132,9 @@ const Index = () => {
         {view === "analytics" ? (
           <motion.div
             key="analytics"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="w-full flex flex-col items-center"
           >
             <AnalyticsPanel
@@ -160,9 +149,9 @@ const Index = () => {
         ) : view === "report" ? (
           <motion.div
             key="report"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="w-full flex flex-col items-center"
           >
             <WeeklyReport
@@ -177,9 +166,9 @@ const Index = () => {
         ) : view === "tasks" ? (
           <motion.div
             key="tasks"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="w-full flex flex-col items-center gap-4"
           >
             <SubjectSelector
@@ -204,17 +193,13 @@ const Index = () => {
         ) : (
           <motion.div
             key="timer"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}
           >
             {inactivityMode ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1.08 }}
-                className="flex flex-col items-center"
-              >
+              <div className="flex flex-col items-center">
                 <CircularTimer
                   timeLeft={timer.timeLeft}
                   progress={timer.progress}
@@ -222,62 +207,48 @@ const Index = () => {
                   isRunning={timer.isRunning}
                 />
                 <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Inactive focus mode — move mouse or press a key to return
+                  Move mouse or press a key to return
                 </p>
-              </motion.div>
+              </div>
             ) : (
-              <>
-                <div className="mb-5">
-                  <MotivationalQuote />
-                </div>
+              <div className="flex w-full flex-col items-center gap-5">
+                <GamificationBar
+                  xp={gamification.xp}
+                  level={gamification.level}
+                  levelProgress={gamification.levelProgress}
+                  xpInCurrentLevel={gamification.xpInCurrentLevel}
+                  xpNeededForNext={gamification.xpNeededForNext}
+                  currentStreak={gamification.currentStreak}
+                  longestStreak={gamification.longestStreak}
+                />
 
-                <div className="mb-4">
-                  <GamificationBar
-                    xp={gamification.xp}
-                    level={gamification.level}
-                    levelProgress={gamification.levelProgress}
-                    xpInCurrentLevel={gamification.xpInCurrentLevel}
-                    xpNeededForNext={gamification.xpNeededForNext}
-                    currentStreak={gamification.currentStreak}
-                    longestStreak={gamification.longestStreak}
-                  />
-                </div>
+                <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
 
-                <div className="mb-5">
-                  <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
-                </div>
+                <SubjectSelector
+                  subjects={timer.subjects}
+                  currentSubject={timer.currentSubject}
+                  onSelect={timer.setCurrentSubject}
+                  onAdd={timer.addSubject}
+                  onRemove={timer.removeSubject}
+                  disabled={timer.isRunning}
+                  getSubjectColor={gamification.getSubjectColor}
+                  onColorChange={gamification.setSubjectColor}
+                  palette={gamification.palette}
+                />
 
-                <div className="mb-7">
-                  <SubjectSelector
-                    subjects={timer.subjects}
-                    currentSubject={timer.currentSubject}
-                    onSelect={timer.setCurrentSubject}
-                    onAdd={timer.addSubject}
-                    onRemove={timer.removeSubject}
-                    disabled={timer.isRunning}
-                    getSubjectColor={gamification.getSubjectColor}
-                    onColorChange={gamification.setSubjectColor}
-                    palette={gamification.palette}
-                  />
-                </div>
+                <CircularTimer
+                  timeLeft={timer.timeLeft}
+                  progress={timer.progress}
+                  mode={timer.mode}
+                  isRunning={timer.isRunning}
+                />
 
-                <div className="mb-7">
-                  <CircularTimer
-                    timeLeft={timer.timeLeft}
-                    progress={timer.progress}
-                    mode={timer.mode}
-                    isRunning={timer.isRunning}
-                  />
-                </div>
-
-                <div className="mb-8">
-                  <TimerControls
-                    isRunning={timer.isRunning}
-                    onStart={handleStart}
-                    onPause={timer.pause}
-                    onReset={timer.reset}
-                  />
-                </div>
+                <TimerControls
+                  isRunning={timer.isRunning}
+                  onStart={handleStart}
+                  onPause={timer.pause}
+                  onReset={timer.reset}
+                />
 
                 <SessionStats
                   sessionsCompleted={timer.sessionsCompleted}
@@ -288,22 +259,18 @@ const Index = () => {
                   subjectTimes={timer.subjectTimes}
                 />
 
-                <div className="mt-4">
-                  <ExamCountdown
-                    exams={examCountdown.exams}
-                    onAdd={examCountdown.addExam}
-                    onRemove={examCountdown.removeExam}
-                  />
-                </div>
+                <ExamCountdown
+                  exams={examCountdown.exams}
+                  onAdd={examCountdown.addExam}
+                  onRemove={examCountdown.removeExam}
+                />
 
-                <div className="mt-4">
-                  <FocusMediaEmbed />
-                </div>
+                <FocusMediaEmbed />
 
-                <p className="mt-6 text-xs text-muted-foreground/50">
+                <p className="text-xs text-muted-foreground/50">
                   {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
                 </p>
-              </>
+              </div>
             )}
           </motion.div>
         )}
