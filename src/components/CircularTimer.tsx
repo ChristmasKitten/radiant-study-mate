@@ -19,9 +19,18 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
-  const colorClass = mode === "focus" ? "text-primary" : mode === "shortBreak" ? "text-timer-warn" : "text-accent";
-  const strokeColor = mode === "focus" ? "hsl(150, 80%, 55%)" : mode === "shortBreak" ? "hsl(30, 90%, 60%)" : "hsl(30, 90%, 60%)";
-  const glowColor = mode === "focus" ? "0 0 30px hsl(150 80% 55% / 0.4)" : "0 0 30px hsl(30 90% 60% / 0.4)";
+  // Use CSS variable-based colors so they respond to theme changes
+  const isFocus = mode === "focus";
+  const colorClass = isFocus ? "text-primary" : mode === "shortBreak" ? "text-timer-warn" : "text-accent";
+
+  // For SVG we need actual color values — read from CSS vars at render time
+  const computedStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+  const primaryHsl = computedStyle?.getPropertyValue("--primary")?.trim() || "150 80% 55%";
+  const warnHsl = "30 90% 60%";
+
+  const activeHsl = isFocus ? primaryHsl : warnHsl;
+  const strokeColor = `hsl(${activeHsl})`;
+  const glowShadow = `0 0 30px hsl(${activeHsl} / 0.4)`;
 
   return (
     <div className="relative flex items-center justify-center">
@@ -32,7 +41,7 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           style={{
             width: size + 40,
             height: size + 40,
-            boxShadow: glowColor,
+            boxShadow: glowShadow,
           }}
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -46,7 +55,7 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(230 15% 18%)"
+          stroke="hsl(var(--border))"
           strokeWidth={strokeWidth}
         />
         {/* Progress circle */}
@@ -62,7 +71,6 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{ filter: isRunning ? `drop-shadow(${glowColor})` : "none" }}
         />
       </svg>
 

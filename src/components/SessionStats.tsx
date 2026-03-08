@@ -36,23 +36,23 @@ export function SessionStats({
   ];
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-md">
-      {/* Compact current subject inline */}
-      <div className="flex items-center gap-2 rounded-lg bg-card border border-border px-3 py-2">
+    <div className="flex flex-col gap-2 w-full max-w-md items-center">
+      {/* Compact subject pill */}
+      <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5">
         <BookOpen className="h-3 w-3 text-primary shrink-0" />
-        <span className="text-xs font-medium text-foreground truncate">{currentSubject}</span>
-        <span className="text-[10px] text-muted-foreground">•</span>
-        <span className="font-mono text-xs font-bold text-primary">
+        <span className="text-[11px] font-medium text-foreground">{currentSubject}</span>
+        <span className="text-muted-foreground/40">·</span>
+        <span className="font-mono text-[11px] font-bold text-primary">
           {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
         </span>
-        <span className="text-[10px] text-muted-foreground">•</span>
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="text-muted-foreground/40">·</span>
+        <span className="font-mono text-[11px] text-muted-foreground">
           {currentSubjectTime?.sessions ?? 0} sess
         </span>
       </div>
 
       {/* General stats */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-2 w-full">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
