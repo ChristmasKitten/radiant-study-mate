@@ -55,6 +55,21 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
         />
       </svg>
+
+      {/* Timer text overlay */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className={`text-6xl font-bold tracking-tight ${colorClass}`}>
+          {formatted}
+        </span>
+        <span className="text-sm text-muted-foreground mt-2 capitalize">
+          {mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break"}
+        </span>
+        {isRunning && (
+          <span className="text-xs text-muted-foreground mt-1">
+            ends at {getEndTime(timeLeft)}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
