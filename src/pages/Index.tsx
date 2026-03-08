@@ -13,6 +13,8 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TaskList } from "@/components/TaskList";
+import { MotivationalQuote } from "@/components/MotivationalQuote";
+import { FocusSounds } from "@/components/FocusSounds";
 import { Button } from "@/components/ui/button";
 
 type View = "timer" | "analytics" | "tasks";
@@ -105,7 +107,6 @@ const Index = () => {
             exit={{ opacity: 0, y: -20 }}
             className="w-full flex flex-col items-center gap-4"
           >
-            {/* Subject selector for tasks */}
             <SubjectSelector
               subjects={timer.subjects}
               currentSubject={timer.currentSubject}
@@ -130,6 +131,11 @@ const Index = () => {
             exit={{ opacity: 0, y: -20 }}
             className="flex flex-col items-center w-full"
           >
+            {/* Motivational Quote */}
+            <div className="mb-5">
+              <MotivationalQuote />
+            </div>
+
             {/* Mode Selector */}
             <div className="mb-5">
               <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
@@ -176,6 +182,11 @@ const Index = () => {
               currentSubject={timer.currentSubject}
               subjectTimes={timer.subjectTimes}
             />
+
+            {/* Focus Sounds */}
+            <div className="mt-4">
+              <FocusSounds />
+            </div>
 
             <p className="mt-6 text-xs text-muted-foreground/50">
               {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
