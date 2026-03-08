@@ -13,8 +13,16 @@ interface ExamCountdownProps {
 
 export function ExamCountdown({ exams, onAdd, onRemove }: ExamCountdownProps) {
   const [adding, setAdding] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem("studyflow_exam_hidden") === "true");
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+
+  const toggleCollapsed = () => {
+    setCollapsed((v) => {
+      localStorage.setItem("studyflow_exam_hidden", String(!v));
+      return !v;
+    });
+  };
 
   const handleAdd = () => {
     if (name.trim() && date) {
