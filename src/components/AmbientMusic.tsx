@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Music, X, Volume2, VolumeX } from "lucide-react";
+import { Music, X, Volume2, VolumeX, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
@@ -75,10 +75,39 @@ export function AmbientMusic() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeNoise, setActiveNoise] = useState<NoiseColor | null>(null);
   const [volume, setVolume] = useState(40);
+  const [spotifyUrl, setSpotifyUrl] = useState(() => localStorage.getItem("studyflow_spotify") ?? "");
+  const [spotifyInput, setSpotifyInput] = useState("");
+  const [showSpotify, setShowSpotify] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const noiseCtxRef = useRef<AudioContext | null>(null);
   const noiseGainRef = useRef<GainNode | null>(null);
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
+
+  // Convert Spotify URL to embed URL
+  const getSpotifyEmbedUrl = (url: string): string | null => {
+    try {
+      // Match open.spotify.com/playlist/ID, /track/ID, /album/ID, /episode/ID
+      const match = url.match(/open\.spotify\.com\/(playlist|track|album|episode)\/([a-zA-Z0-9]+)/);
+      if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleSpotifySave = () => {
+    const trimmed = spotifyInput.trim();
+    if (!trimmed) {
+      setSpotifyUrl("");
+      localStorage.removeItem("studyflow_spotify");
+      return;
+    }
+    if (getSpotifyEmbedUrl(trimmed)) {
+      setSpotifyUrl(trimmed);
+      localStorage.setItem("studyflow_spotify", trimmed);
+      setSpotifyInput("");
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -221,6 +250,66 @@ export function AmbientMusic() {
                   <span className="text-[10px] text-muted-foreground">{noise.label}</span>
                 </button>
               ))}
+            </div>
+
+            {/* Spotify embed */}
+            <div className="mb-4">
+              <button
+                onClick={() => setShowSpotify((v) => !v)}
+                className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground mb-2"
+              >
+                <Link className="h-3 w-3" />
+                <span>Spotify Playlist</span>
+              </button>
+
+              {showSpotify && (
+                <div className="space-y-2">
+                  {!spotifyUrl ? (
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={spotifyInput}
+                        onChange={(e) => setSpotifyInput(e.target.value.slice(0, 200))}
+                        onKeyDown={(e) => e.key === "Enter" && handleSpotifySave()}
+                        placeholder="Paste Spotify URL…"
+                        className="flex-1 rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSpotifySave}
+                        disabled={!spotifyInput.trim() || !getSpotifyEmbedUrl(spotifyInput.trim())}
+                        className="h-7 rounded-lg px-2.5 text-[10px]"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <iframe
+                        src={getSpotifyEmbedUrl(spotifyUrl) ?? ""}
+                        width="100%"
+                        height="152"
+                        frameBorder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        className="rounded-xl"
+                        title="Spotify Player"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSpotifyUrl("");
+                          localStorage.removeItem("studyflow_spotify");
+                        }}
+                        className="w-full h-6 text-[10px] text-muted-foreground hover:text-destructive"
+                      >
+                        Remove playlist
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Volume */}
