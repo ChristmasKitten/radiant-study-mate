@@ -228,6 +228,14 @@ const Index = () => {
                 palette={gamification.palette}
               />
 
+              <SpacedRepetitionNudge
+                subjects={timer.subjects}
+                currentSubject={timer.currentSubject}
+                isRunning={timer.isRunning}
+                onSwitchSubject={timer.setCurrentSubject}
+                getSubjectColor={gamification.getSubjectColor}
+              />
+
               <CircularTimer
                 timeLeft={timer.timeLeft}
                 progress={timer.progress}
