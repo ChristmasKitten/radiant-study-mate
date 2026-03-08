@@ -18,6 +18,20 @@ const TRACKS: Track[] = [
   { label: "Ocean", emoji: "🌊", url: "https://cdn.pixabay.com/audio/2022/04/27/audio_67dce6b5f8.mp3" },
 ];
 
+type NoiseColor = "white" | "pink" | "brown";
+
+interface NoiseOption {
+  id: NoiseColor;
+  label: string;
+  emoji: string;
+}
+
+const NOISE_OPTIONS: NoiseOption[] = [
+  { id: "white", label: "White", emoji: "⚪" },
+  { id: "pink", label: "Pink", emoji: "🩷" },
+  { id: "brown", label: "Brown", emoji: "🟤" },
+];
+
 export function AmbientMusic() {
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState<string | null>(null);
