@@ -19,7 +19,7 @@ type View = "timer" | "analytics" | "tasks";
 
 const Index = () => {
   const timer = useStudyTimer();
-  const { isDark, toggle: toggleTheme } = useThemeToggle();
+  const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
   const taskList = useTaskList();
   const [view, setView] = useState<View>("timer");
 
@@ -71,6 +71,8 @@ const Index = () => {
           <SettingsPanel
             durations={timer.customDurations}
             onDurationsChange={timer.setCustomDurations}
+            colorTheme={colorTheme}
+            onColorChange={setColor}
             disabled={timer.isRunning}
           />
           <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
