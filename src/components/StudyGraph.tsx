@@ -15,7 +15,6 @@ function formatTime(seconds: number) {
 
 export function StudyGraph({ dailyRecords }: StudyGraphProps) {
   const data = useMemo(() => {
-    // Show last 30 days
     const days: { date: string; label: string; minutes: number; totalSeconds: number }[] = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date();
@@ -48,21 +47,21 @@ export function StudyGraph({ dailyRecords }: StudyGraphProps) {
           <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="studyGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(150, 80%, 55%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(150, 80%, 55%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 15%, 18%)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 9, fill: "hsl(220, 10%, 45%)" }}
+              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               axisLine={false}
               interval="preserveStartEnd"
               tickCount={5}
             />
             <YAxis
-              tick={{ fontSize: 9, fill: "hsl(220, 10%, 45%)" }}
+              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => `${v}m`}
@@ -82,11 +81,11 @@ export function StudyGraph({ dailyRecords }: StudyGraphProps) {
             <Area
               type="monotone"
               dataKey="minutes"
-              stroke="hsl(150, 80%, 55%)"
+              stroke="hsl(var(--primary))"
               strokeWidth={2}
               fill="url(#studyGradient)"
               dot={false}
-              activeDot={{ r: 4, fill: "hsl(150, 80%, 55%)", stroke: "hsl(230, 25%, 7%)", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
