@@ -200,28 +200,6 @@ const Index = () => {
         </div>
       )}
 
-      {view === "tasks" && (
-        <div className="flex w-full flex-col items-center gap-4">
-          <SubjectSelector
-            subjects={timer.subjects}
-            currentSubject={timer.currentSubject}
-            onSelect={timer.setCurrentSubject}
-            onAdd={timer.addSubject}
-            onRemove={timer.removeSubject}
-            disabled={timer.isRunning}
-            getSubjectColor={gamification.getSubjectColor}
-            onColorChange={gamification.setSubjectColor}
-            palette={gamification.palette}
-          />
-          <TaskList
-            subject={timer.currentSubject}
-            tasks={taskList.getTasksForSubject(timer.currentSubject)}
-            onAdd={taskList.addTask}
-            onToggle={taskList.toggleTask}
-            onRemove={taskList.removeTask}
-          />
-        </div>
-      )}
 
       {view === "timer" && (
         <div className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}>
@@ -284,8 +262,13 @@ const Index = () => {
                 onRemove={examCountdown.removeExam}
               />
 
-              <p className="text-xs text-muted-foreground/50">
-                {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
+              <TaskList
+                subject={timer.currentSubject}
+                tasks={taskList.getTasksForSubject(timer.currentSubject)}
+                onAdd={taskList.addTask}
+                onToggle={taskList.toggleTask}
+                onRemove={taskList.removeTask}
+              />
               </p>
             </div>
           )}
