@@ -75,10 +75,39 @@ export function AmbientMusic() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeNoise, setActiveNoise] = useState<NoiseColor | null>(null);
   const [volume, setVolume] = useState(40);
+  const [spotifyUrl, setSpotifyUrl] = useState(() => localStorage.getItem("studyflow_spotify") ?? "");
+  const [spotifyInput, setSpotifyInput] = useState("");
+  const [showSpotify, setShowSpotify] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const noiseCtxRef = useRef<AudioContext | null>(null);
   const noiseGainRef = useRef<GainNode | null>(null);
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
+
+  // Convert Spotify URL to embed URL
+  const getSpotifyEmbedUrl = (url: string): string | null => {
+    try {
+      // Match open.spotify.com/playlist/ID, /track/ID, /album/ID, /episode/ID
+      const match = url.match(/open\.spotify\.com\/(playlist|track|album|episode)\/([a-zA-Z0-9]+)/);
+      if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleSpotifySave = () => {
+    const trimmed = spotifyInput.trim();
+    if (!trimmed) {
+      setSpotifyUrl("");
+      localStorage.removeItem("studyflow_spotify");
+      return;
+    }
+    if (getSpotifyEmbedUrl(trimmed)) {
+      setSpotifyUrl(trimmed);
+      localStorage.setItem("studyflow_spotify", trimmed);
+      setSpotifyInput("");
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
