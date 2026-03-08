@@ -252,6 +252,66 @@ export function AmbientMusic() {
               ))}
             </div>
 
+            {/* Spotify embed */}
+            <div className="mb-4">
+              <button
+                onClick={() => setShowSpotify((v) => !v)}
+                className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground mb-2"
+              >
+                <Link className="h-3 w-3" />
+                <span>Spotify Playlist</span>
+              </button>
+
+              {showSpotify && (
+                <div className="space-y-2">
+                  {!spotifyUrl ? (
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={spotifyInput}
+                        onChange={(e) => setSpotifyInput(e.target.value.slice(0, 200))}
+                        onKeyDown={(e) => e.key === "Enter" && handleSpotifySave()}
+                        placeholder="Paste Spotify URL…"
+                        className="flex-1 rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSpotifySave}
+                        disabled={!spotifyInput.trim() || !getSpotifyEmbedUrl(spotifyInput.trim())}
+                        className="h-7 rounded-lg px-2.5 text-[10px]"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <iframe
+                        src={getSpotifyEmbedUrl(spotifyUrl) ?? ""}
+                        width="100%"
+                        height="152"
+                        frameBorder="0"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        className="rounded-xl"
+                        title="Spotify Player"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSpotifyUrl("");
+                          localStorage.removeItem("studyflow_spotify");
+                        }}
+                        className="w-full h-6 text-[10px] text-muted-foreground hover:text-destructive"
+                      >
+                        Remove playlist
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Volume */}
             <div className="flex items-center gap-3">
               <VolumeX className="h-3.5 w-3.5 text-muted-foreground" />
