@@ -68,11 +68,13 @@ export function SubjectSelector({
                 <button
                   onClick={() => !disabled && onSelect(subject)}
                   className={`flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
+                    isActive && color && color !== "none"
                       ? "border-transparent text-primary-foreground"
+                      : isActive
+                      ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
-                  style={isActive && color ? { backgroundColor: color } : undefined}
+                  style={isActive && color && color !== "none" ? { backgroundColor: color } : undefined}
                   type="button"
                 >
                   <span className="truncate">{subject}</span>
@@ -112,7 +114,7 @@ export function SubjectSelector({
                       side="top"
                       onOpenAutoFocus={(e) => e.preventDefault()}
                     >
-                      <div className="grid grid-cols-7 gap-1">
+                      <div className="grid grid-cols-8 gap-1">
                         {(palette ?? []).map((c) => (
                           <button
                             key={c}
@@ -122,10 +124,13 @@ export function SubjectSelector({
                             }}
                             className={`h-5 w-5 rounded-full border-2 ${
                               getSubjectColor?.(subject) === c ? "border-foreground" : "border-transparent"
-                            }`}
-                            style={{ backgroundColor: c }}
+                            } ${c === "none" ? "bg-secondary flex items-center justify-center text-[8px] text-muted-foreground" : ""}`}
+                            style={c !== "none" ? { backgroundColor: c } : undefined}
                             type="button"
-                          />
+                            title={c === "none" ? "No color" : c}
+                          >
+                            {c === "none" ? "✕" : ""}
+                          </button>
                         ))}
                       </div>
                     </PopoverContent>

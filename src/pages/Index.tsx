@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, BarChart3, ListTodo, FileText } from "lucide-react";
+import { BookOpen, BarChart3, ListTodo, FileText, Maximize2 } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
@@ -8,7 +8,6 @@ import { useGamification } from "@/hooks/useGamification";
 import { useExamCountdown } from "@/hooks/useExamCountdown";
 import { useReminders } from "@/hooks/useReminders";
 import { toast } from "@/hooks/use-toast";
-import { getSessionReminderQuote } from "@/lib/motivationalQuotes";
 import { fireSessionComplete, fireLevelUp } from "@/lib/celebrations";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
@@ -22,6 +21,7 @@ import { TaskList } from "@/components/TaskList";
 import { GamificationBar } from "@/components/GamificationBar";
 import { ExamCountdown } from "@/components/ExamCountdown";
 import { WeeklyReport } from "@/components/WeeklyReport";
+import { StudyCat } from "@/components/StudyCat";
 import { Button } from "@/components/ui/button";
 
 type View = "timer" | "analytics" | "tasks" | "report";
@@ -33,6 +33,7 @@ const Index = () => {
   const gamification = useGamification();
   const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
+  const [focusMode, setFocusMode] = useState(false);
 
   useReminders({ isRunning: timer.isRunning });
 
@@ -63,13 +64,41 @@ const Index = () => {
   }, [gamification]);
 
   const handleStart = () => {
-    const quote = getSessionReminderQuote();
-    toast({
-      title: "💪 Let's go!",
-      description: `"${quote.text}" — ${quote.author}`,
-    });
     timer.start();
   };
+
+  // Fullscreen focus mode
+  if (focusMode) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setFocusMode(false);
+        }}
+      >
+        <div className="flex flex-col items-center gap-6">
+          <CircularTimer
+            timeLeft={timer.timeLeft}
+            progress={timer.progress}
+            mode={timer.mode}
+            isRunning={timer.isRunning}
+          />
+
+          <TimerControls
+            isRunning={timer.isRunning}
+            onStart={handleStart}
+            onPause={timer.pause}
+            onReset={timer.reset}
+          />
+
+          <p className="text-xs text-muted-foreground/40">
+            {timer.currentSubject} • Click outside to exit
+          </p>
+        </div>
+        <StudyCat />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
@@ -223,12 +252,23 @@ const Index = () => {
                 isRunning={timer.isRunning}
               />
 
-              <TimerControls
-                isRunning={timer.isRunning}
-                onStart={handleStart}
-                onPause={timer.pause}
-                onReset={timer.reset}
-              />
+              <div className="flex items-center gap-3">
+                <TimerControls
+                  isRunning={timer.isRunning}
+                  onStart={handleStart}
+                  onPause={timer.pause}
+                  onReset={timer.reset}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setFocusMode(true)}
+                  className="h-10 w-10 rounded-full text-muted-foreground hover:text-primary"
+                  title="Enter focus mode"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+              </div>
 
               <SessionStats
                 sessionsCompleted={timer.sessionsCompleted}
@@ -253,6 +293,8 @@ const Index = () => {
           )}
         </div>
       )}
+
+      <StudyCat />
     </div>
   );
 };
