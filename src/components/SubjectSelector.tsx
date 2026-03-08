@@ -66,7 +66,7 @@ export function SubjectSelector({
               <button
                 key={subject}
                 onClick={() => !disabled && onSelect(subject)}
-                className={`group relative flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium ${
+                className={`group relative flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "border-transparent text-primary-foreground"
                     : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -74,8 +74,11 @@ export function SubjectSelector({
                 style={isActive && color ? { backgroundColor: color } : undefined}
                 type="button"
               >
-                {color && !isActive && <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />}
-                {subject}
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: color ?? "hsl(var(--muted-foreground) / 0.35)" }}
+                />
+                <span className="truncate">{subject}</span>
 
                 {!disabled && subjects.length > 1 && (
                   <span
