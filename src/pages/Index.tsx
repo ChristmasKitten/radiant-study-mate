@@ -269,7 +269,7 @@ const Index = () => {
                 onToggle={taskList.toggleTask}
                 onRemove={taskList.removeTask}
               />
-              </p>
+            </div>
             </div>
           )}
         </div>
