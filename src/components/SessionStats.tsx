@@ -36,50 +36,19 @@ export function SessionStats({
   ];
 
   return (
-    <div className="flex flex-col gap-3 w-full max-w-md">
-      {/* Current subject stats */}
-      <div className="rounded-xl bg-card border border-border p-3">
-        <div className="flex items-center gap-2 mb-2">
-          <BookOpen className="h-3 w-3 text-primary" />
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{currentSubject}</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <span className="font-mono text-lg font-bold text-foreground">
-              {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
-            </span>
-            <span className="text-[9px] text-muted-foreground">Time studied</span>
-          </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="flex flex-col">
-            <span className="font-mono text-lg font-bold text-foreground">
-              {currentSubjectTime?.sessions ?? 0}
-            </span>
-            <span className="text-[9px] text-muted-foreground">Sessions</span>
-          </div>
-          {subjectTimes.length > 1 && (
-            <>
-              <div className="h-8 w-px bg-border" />
-              <div className="flex flex-1 gap-1 overflow-hidden">
-                {subjectTimes
-                  .sort((a, b) => b.totalSeconds - a.totalSeconds)
-                  .slice(0, 3)
-                  .map((st) => (
-                    <div
-                      key={st.subject}
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-medium truncate ${
-                        st.subject === currentSubject
-                          ? "bg-primary/15 text-primary"
-                          : "bg-secondary text-muted-foreground"
-                      }`}
-                    >
-                      {st.subject}: {formatTime(st.totalSeconds)}
-                    </div>
-                  ))}
-              </div>
-            </>
-          )}
-        </div>
+    <div className="flex flex-col gap-2 w-full max-w-md">
+      {/* Compact current subject inline */}
+      <div className="flex items-center gap-2 rounded-lg bg-card border border-border px-3 py-2">
+        <BookOpen className="h-3 w-3 text-primary shrink-0" />
+        <span className="text-xs font-medium text-foreground truncate">{currentSubject}</span>
+        <span className="text-[10px] text-muted-foreground">•</span>
+        <span className="font-mono text-xs font-bold text-primary">
+          {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
+        </span>
+        <span className="text-[10px] text-muted-foreground">•</span>
+        <span className="font-mono text-xs text-muted-foreground">
+          {currentSubjectTime?.sessions ?? 0} sess
+        </span>
       </div>
 
       {/* General stats */}
