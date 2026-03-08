@@ -127,19 +127,7 @@ const Index = () => {
               longestStreak={gamification.longestStreak}
             />
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView((v) => (v === "tasks" ? "timer" : "tasks"))}
-              className={`relative h-9 w-9 rounded-full ${view === "tasks" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <ListTodo className="h-4 w-4" />
-              {pendingForCurrent > 0 && view !== "tasks" && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
-                  {pendingForCurrent}
-                </span>
-              )}
-            </Button>
+
             <Button
               variant="ghost"
               size="icon"
