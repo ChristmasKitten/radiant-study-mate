@@ -5,68 +5,59 @@ export type ColorTheme = "emerald" | "ocean" | "sunset" | "violet" | "rose" | "a
 const THEME_KEY = "studyflow_theme";
 const COLOR_KEY = "studyflow_color";
 
-interface ThemeColors {
-  light: { primary: string; ring: string; timerGlow: string };
-  dark: { primary: string; ring: string; timerGlow: string };
+interface ModeColors {
+  primary: string;
+  primaryForeground: string;
+  ring: string;
+  timerGlow: string;
 }
 
-export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string; colors: ThemeColors }> = {
+export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string; light: ModeColors; dark: ModeColors }> = {
   emerald: {
     label: "Emerald",
     preview: "hsl(150, 70%, 40%)",
-    colors: {
-      light: { primary: "150 70% 40%", ring: "150 70% 40%", timerGlow: "150 80% 55%" },
-      dark: { primary: "150 80% 55%", ring: "150 80% 55%", timerGlow: "150 80% 55%" },
-    },
+    light: { primary: "150 70% 40%", primaryForeground: "0 0% 100%", ring: "150 70% 40%", timerGlow: "150 80% 55%" },
+    dark: { primary: "150 80% 55%", primaryForeground: "230 25% 7%", ring: "150 80% 55%", timerGlow: "150 80% 55%" },
   },
   ocean: {
     label: "Ocean",
     preview: "hsl(210, 80%, 55%)",
-    colors: {
-      light: { primary: "210 70% 45%", ring: "210 70% 45%", timerGlow: "210 80% 55%" },
-      dark: { primary: "210 80% 60%", ring: "210 80% 60%", timerGlow: "210 80% 60%" },
-    },
+    light: { primary: "210 70% 45%", primaryForeground: "0 0% 100%", ring: "210 70% 45%", timerGlow: "210 80% 55%" },
+    dark: { primary: "210 80% 60%", primaryForeground: "230 25% 7%", ring: "210 80% 60%", timerGlow: "210 80% 60%" },
   },
   sunset: {
     label: "Sunset",
     preview: "hsl(15, 85%, 55%)",
-    colors: {
-      light: { primary: "15 75% 48%", ring: "15 75% 48%", timerGlow: "15 85% 55%" },
-      dark: { primary: "15 85% 58%", ring: "15 85% 58%", timerGlow: "15 85% 58%" },
-    },
+    light: { primary: "15 75% 48%", primaryForeground: "0 0% 100%", ring: "15 75% 48%", timerGlow: "15 85% 55%" },
+    dark: { primary: "15 85% 58%", primaryForeground: "230 25% 7%", ring: "15 85% 58%", timerGlow: "15 85% 58%" },
   },
   violet: {
     label: "Violet",
     preview: "hsl(270, 70%, 55%)",
-    colors: {
-      light: { primary: "270 60% 50%", ring: "270 60% 50%", timerGlow: "270 70% 55%" },
-      dark: { primary: "270 70% 65%", ring: "270 70% 65%", timerGlow: "270 70% 65%" },
-    },
+    light: { primary: "270 60% 50%", primaryForeground: "0 0% 100%", ring: "270 60% 50%", timerGlow: "270 70% 55%" },
+    dark: { primary: "270 70% 65%", primaryForeground: "230 25% 7%", ring: "270 70% 65%", timerGlow: "270 70% 65%" },
   },
   rose: {
     label: "Rose",
     preview: "hsl(340, 75%, 55%)",
-    colors: {
-      light: { primary: "340 65% 47%", ring: "340 65% 47%", timerGlow: "340 75% 55%" },
-      dark: { primary: "340 75% 60%", ring: "340 75% 60%", timerGlow: "340 75% 60%" },
-    },
+    light: { primary: "340 65% 47%", primaryForeground: "0 0% 100%", ring: "340 65% 47%", timerGlow: "340 75% 55%" },
+    dark: { primary: "340 75% 60%", primaryForeground: "230 25% 7%", ring: "340 75% 60%", timerGlow: "340 75% 60%" },
   },
   amber: {
     label: "Amber",
     preview: "hsl(40, 90%, 50%)",
-    colors: {
-      light: { primary: "40 80% 45%", ring: "40 80% 45%", timerGlow: "40 90% 50%" },
-      dark: { primary: "40 90% 55%", ring: "40 90% 55%", timerGlow: "40 90% 55%" },
-    },
+    light: { primary: "40 80% 45%", primaryForeground: "0 0% 100%", ring: "40 80% 45%", timerGlow: "40 90% 50%" },
+    dark: { primary: "40 90% 55%", primaryForeground: "230 25% 7%", ring: "40 90% 55%", timerGlow: "40 90% 55%" },
   },
 };
 
 function applyColorTheme(colorTheme: ColorTheme, isDark: boolean) {
   const root = document.documentElement;
-  const colors = COLOR_THEMES[colorTheme].colors[isDark ? "dark" : "light"];
-  root.style.setProperty("--primary", colors.primary);
-  root.style.setProperty("--ring", colors.ring);
-  root.style.setProperty("--timer-glow", colors.timerGlow);
+  const c = COLOR_THEMES[colorTheme][isDark ? "dark" : "light"];
+  root.style.setProperty("--primary", c.primary);
+  root.style.setProperty("--primary-foreground", c.primaryForeground);
+  root.style.setProperty("--ring", c.ring);
+  root.style.setProperty("--timer-glow", c.timerGlow);
 }
 
 export function useThemeToggle() {
