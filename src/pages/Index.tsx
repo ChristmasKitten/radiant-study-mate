@@ -132,7 +132,7 @@ const Index = () => {
               onDurationsChange={timer.setCustomDurations}
               colorTheme={colorTheme}
               onColorChange={setColor}
-              disabled={timer.isRunning}
+              disabled={false}
             />
             <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           </div>
