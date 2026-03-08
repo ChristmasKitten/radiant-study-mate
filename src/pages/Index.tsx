@@ -24,7 +24,7 @@ import { WeeklyReport } from "@/components/WeeklyReport";
 import { StudyCat } from "@/components/StudyCat";
 import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
-import { SpacedRepetitionNudge, markSubjectStudied } from "@/components/SpacedRepetitionNudge";
+
 import { Button } from "@/components/ui/button";
 
 type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
@@ -53,7 +53,7 @@ const Index = () => {
   useEffect(() => {
     const handler = () => {
       fireSessionComplete();
-      markSubjectStudied(timer.currentSubject);
+      
       const prevLevel = prevLevelRef.current;
       gamification.awardSessionXP();
       setTimeout(() => {
@@ -228,13 +228,6 @@ const Index = () => {
                 palette={gamification.palette}
               />
 
-              <SpacedRepetitionNudge
-                subjects={timer.subjects}
-                currentSubject={timer.currentSubject}
-                isRunning={timer.isRunning}
-                onSwitchSubject={timer.setCurrentSubject}
-                getSubjectColor={gamification.getSubjectColor}
-              />
 
               <CircularTimer
                 timeLeft={timer.timeLeft}
