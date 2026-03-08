@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Music, X, Volume2, VolumeX } from "lucide-react";
+import { Music, X, Volume2, VolumeX, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
