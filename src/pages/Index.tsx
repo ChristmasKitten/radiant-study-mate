@@ -79,12 +79,9 @@ const Index = () => {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <BookOpen className="h-4 w-4 text-primary" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Study<span className="text-primary">Flow</span>
-              </h1>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{timer.currentSubject}</p>
-            </div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Study<span className="text-primary">Flow</span>
+            </h1>
           </div>
 
           <div className="flex items-center gap-1">

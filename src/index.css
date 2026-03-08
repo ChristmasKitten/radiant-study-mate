@@ -76,6 +76,24 @@
     --timer-glow: 150 80% 55%;
   }
 
+  /* ===== EMERALD ===== */
+  .theme-emerald {
+    --primary: 150 70% 40%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 150 70% 40%;
+    --timer-glow: 150 70% 40%;
+    --sidebar-primary: 150 70% 40%;
+    --sidebar-ring: 150 70% 40%;
+  }
+  .dark.theme-emerald {
+    --primary: 150 80% 55%;
+    --primary-foreground: 230 25% 7%;
+    --ring: 150 80% 55%;
+    --timer-glow: 150 80% 55%;
+    --sidebar-primary: 150 80% 55%;
+    --sidebar-ring: 150 80% 55%;
+  }
+
   /* ===== OCEAN ===== */
   .theme-ocean {
     --primary: 210 70% 45%;

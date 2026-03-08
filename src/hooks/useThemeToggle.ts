@@ -4,6 +4,7 @@ export type ColorTheme = "emerald" | "ocean" | "sunset" | "violet" | "rose" | "a
 
 const THEME_KEY = "studyflow_theme";
 const COLOR_KEY = "studyflow_color";
+const THEME_CLASSES: ColorTheme[] = ["emerald", "ocean", "sunset", "violet", "rose", "amber"];
 
 export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string }> = {
   emerald: { label: "Emerald", preview: "hsl(150 70% 40%)" },
@@ -72,8 +73,12 @@ export function useThemeToggle() {
     const palette = THEME_VALUES[colorTheme][isDark ? "dark" : "light"];
 
     root.classList.toggle("dark", isDark);
+    THEME_CLASSES.forEach((theme) => root.classList.remove(`theme-${theme}`));
+    root.classList.add(`theme-${colorTheme}`);
+
     root.style.colorScheme = isDark ? "dark" : "light";
 
+    // Inline fallback to guarantee updates even if stylesheet cache lags.
     root.style.setProperty("--primary", palette.primary);
     root.style.setProperty("--primary-foreground", palette.primaryForeground);
     root.style.setProperty("--ring", palette.primary);

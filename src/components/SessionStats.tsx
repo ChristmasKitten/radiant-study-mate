@@ -1,4 +1,4 @@
-import { Clock, Flame, Timer, BookOpen } from "lucide-react";
+import { Clock, Flame, Target, Timer, BookOpen } from "lucide-react";
 import { SubjectTime } from "@/hooks/useStudyTimer";
 
 interface SessionStatsProps {
@@ -28,49 +28,47 @@ export function SessionStats({
   const currentSubjectTime = subjectTimes.find((s) => s.subject === currentSubject);
 
   return (
-    <div className="w-full max-w-md space-y-2">
-      <div className="rounded-xl border border-border bg-card p-3">
-        <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-          <BookOpen className="h-3.5 w-3.5 text-primary" />
-          Current Subject
-        </div>
+    <div className="w-full max-w-md space-y-2.5">
+      <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-primary/10 p-4">
+        <div className="absolute -right-6 -top-8 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
+        <div className="relative">
+          <div className="mb-3 flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-primary" />
+            <p className="text-[10px] uppercase tracking-widest text-primary/80">Current Subject</p>
+          </div>
 
-        <div className="flex items-center justify-between">
-          <p className="truncate text-sm font-semibold text-foreground">{currentSubject}</p>
-          <p className="font-mono text-xs text-muted-foreground">{currentSubjectTime?.sessions ?? 0} sessions</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-primary/20 bg-card/70 p-3">
+              <p className="truncate text-sm font-semibold text-foreground">{currentSubject}</p>
+              <p className="mt-1 font-mono text-base font-bold text-primary">
+                {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
+              </p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Focused</p>
+            </div>
+            <div className="rounded-lg border border-primary/20 bg-card/70 p-3">
+              <p className="font-mono text-base font-bold text-primary">{currentSubjectTime?.sessions ?? 0}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sessions</p>
+            </div>
+          </div>
         </div>
-
-        <p className="mt-1 font-mono text-lg font-bold text-primary">
-          {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
-        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-border bg-card p-3">
-          <p className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-            <Clock className="h-3 w-3 text-timer-warn" /> Today
-          </p>
-          <p className="font-mono text-sm font-bold text-foreground">{formatTime(totalFocusTime)}</p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-3">
-          <p className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-            <Timer className="h-3 w-3 text-primary" /> All Time
-          </p>
-          <p className="font-mono text-sm font-bold text-foreground">{formatTime(allTimeTotalSeconds)}</p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-3">
-          <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Sessions</p>
-          <p className="font-mono text-sm font-bold text-foreground">{sessionsCompleted}</p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-3">
-          <p className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-            <Flame className="h-3 w-3 text-destructive" /> Best Day
-          </p>
-          <p className="font-mono text-sm font-bold text-foreground">{bestDaySeconds > 0 ? formatTime(bestDaySeconds) : "—"}</p>
-        </div>
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          { icon: Target, label: "Sessions", value: sessionsCompleted, color: "text-primary" },
+          { icon: Clock, label: "Today", value: formatTime(totalFocusTime), color: "text-timer-warn" },
+          { icon: Timer, label: "All Time", value: formatTime(allTimeTotalSeconds), color: "text-primary" },
+          { icon: Flame, label: "Best Day", value: bestDaySeconds > 0 ? formatTime(bestDaySeconds) : "—", color: "text-destructive" },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3"
+          >
+            <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
+            <span className="text-center font-mono text-sm font-bold leading-none text-foreground">{stat.value}</span>
+            <span className="text-center text-[9px] uppercase tracking-widest leading-none text-muted-foreground">{stat.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
