@@ -85,7 +85,7 @@ export function SpacedRepetitionNudge({
 
   return (
     <div className="w-full max-w-md">
-      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5">
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
         <Lightbulb className="h-4 w-4 shrink-0 text-timer-warn" />
         <div className="flex-1 min-w-0">
           <p className="text-xs text-muted-foreground">
