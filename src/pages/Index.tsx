@@ -249,6 +249,7 @@ const Index = () => {
                 currentSubject={timer.currentSubject}
                 subjects={timer.subjects}
                 subjectTimes={timer.subjectTimes}
+                currentStreak={gamification.currentStreak}
               />
 
               <ExamCountdown
