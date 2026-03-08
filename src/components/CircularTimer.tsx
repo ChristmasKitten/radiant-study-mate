@@ -8,6 +8,11 @@ interface CircularTimerProps {
   isRunning: boolean;
 }
 
+function getEndTime(secondsLeft: number): string {
+  const end = new Date(Date.now() + secondsLeft * 1000);
+  return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -72,9 +77,14 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
         >
           {formatted}
         </motion.span>
-        <span className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">
+        <span className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">
           {mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break"}
         </span>
+        {timeLeft > 0 && (
+          <span className="mt-1.5 font-mono text-[11px] text-muted-foreground/70">
+            ends at {getEndTime(timeLeft)}
+          </span>
+        )}
       </div>
     </div>
   );

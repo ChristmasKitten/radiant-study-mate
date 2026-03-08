@@ -3,6 +3,7 @@ import { Trophy, TrendingUp, Calendar, BarChart3 } from "lucide-react";
 import { DailyRecord, SubjectTime } from "@/hooks/useStudyTimer";
 import { StudyGraph } from "@/components/StudyGraph";
 import { StudyCalendar } from "@/components/StudyCalendar";
+import { HourlyHeatmap } from "@/components/HourlyHeatmap";
 
 interface AnalyticsPanelProps {
   dailyRecords: DailyRecord[];
@@ -57,6 +58,9 @@ export function AnalyticsPanel({
           <span className="text-[9px] uppercase tracking-widest text-muted-foreground">Total</span>
         </div>
       </div>
+
+      {/* Hourly Heatmap */}
+      <HourlyHeatmap dailyRecords={dailyRecords} />
 
       {/* Stock-style graph */}
       <StudyGraph dailyRecords={dailyRecords} />
