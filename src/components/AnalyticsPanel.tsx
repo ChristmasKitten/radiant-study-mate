@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Trophy, TrendingUp, Calendar, BarChart3 } from "lucide-react";
 import { DailyRecord, SubjectTime } from "@/hooks/useStudyTimer";
+import { StudyGraph } from "@/components/StudyGraph";
+import { StudyCalendar } from "@/components/StudyCalendar";
 
 interface AnalyticsPanelProps {
   dailyRecords: DailyRecord[];
@@ -24,6 +26,7 @@ function formatDate(dateStr: string) {
 }
 
 export function AnalyticsPanel({
+  dailyRecords,
   last7Days,
   bestDayRecord,
   avgDailyTime,
@@ -54,6 +57,9 @@ export function AnalyticsPanel({
           <span className="text-[9px] uppercase tracking-widest text-muted-foreground">Total</span>
         </div>
       </div>
+
+      {/* Stock-style graph */}
+      <StudyGraph dailyRecords={dailyRecords} />
 
       {/* 7-day bar chart */}
       <div className="rounded-xl bg-card border border-border p-4">
@@ -86,6 +92,9 @@ export function AnalyticsPanel({
           })}
         </div>
       </div>
+
+      {/* Calendar view */}
+      <StudyCalendar dailyRecords={dailyRecords} />
 
       {/* Subject breakdown */}
       {subjectTimes.length > 0 && (
