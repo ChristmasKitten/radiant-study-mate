@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Flame, Star, Trophy, Zap } from "lucide-react";
 import { xpForLevel } from "@/hooks/useGamification";
 
@@ -21,53 +22,67 @@ export function GamificationBar({
   currentStreak,
   longestStreak,
 }: GamificationBarProps) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <Star className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-foreground">Level {level}</p>
-            <p className="text-[10px] text-muted-foreground">{xp} XP total</p>
-          </div>
-        </div>
+    <div className="flex flex-col items-center gap-2">
+      {/* Compact badge - always visible */}
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs transition-colors hover:bg-secondary"
+      >
+        <Star className="h-3 w-3 text-primary" />
+        <span className="font-bold text-foreground">Lv {level}</span>
+        {currentStreak > 0 && (
+          <>
+            <span className="text-muted-foreground">•</span>
+            <Flame className="h-3 w-3 text-destructive" />
+            <span className="font-mono font-bold text-foreground">{currentStreak}</span>
+          </>
+        )}
+      </button>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1" title="Current streak">
-            <Flame className="h-3.5 w-3.5 text-destructive" />
-            <span className="font-mono text-xs font-bold text-foreground">{currentStreak}</span>
-          </div>
-          <div className="flex items-center gap-1" title="Best streak">
-            <Trophy className="h-3.5 w-3.5 text-timer-warn" />
-            <span className="font-mono text-xs font-bold text-foreground">{longestStreak}</span>
-          </div>
-        </div>
-      </div>
+      {/* Expanded details */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="w-full max-w-xs overflow-hidden"
+          >
+            <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{xp} XP total</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1" title="Best streak">
+                    <Trophy className="h-3 w-3 text-timer-warn" />
+                    <span className="font-mono font-bold text-foreground">{longestStreak}</span>
+                  </div>
+                </div>
+              </div>
 
-      {/* XP progress bar */}
-      <div className="relative h-3 overflow-hidden rounded-full bg-secondary">
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full bg-primary"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(levelProgress * 100, 100)}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[8px] font-bold text-primary-foreground drop-shadow-sm">
-            {xpInCurrentLevel} / {xpNeededForNext} XP
-          </span>
-        </div>
-      </div>
+              {/* XP progress bar */}
+              <div className="relative h-2.5 overflow-hidden rounded-full bg-secondary">
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(levelProgress * 100, 100)}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                />
+              </div>
 
-      <div className="mt-2 flex items-center justify-between text-[9px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Zap className="h-2.5 w-2.5 text-primary" />
-          +50 XP per session {currentStreak > 1 && `• +${20 * Math.min(currentStreak, 10)} streak bonus`}
-        </span>
-        <span>Next: Lv{level + 1}</span>
-      </div>
+              <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Zap className="h-2.5 w-2.5 text-primary" />
+                  {xpInCurrentLevel} / {xpNeededForNext} XP
+                </span>
+                <span>Next: Lv {level + 1}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

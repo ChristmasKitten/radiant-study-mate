@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { TimerMode } from "@/hooks/useStudyTimer";
 
 interface CircularTimerProps {
@@ -18,31 +17,18 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
   const seconds = timeLeft % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const size = 280;
-  const strokeWidth = 6;
+  const size = 260;
+  const strokeWidth = 5;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
 
   const isFocus = mode === "focus";
   const colorClass = isFocus ? "text-primary" : mode === "shortBreak" ? "text-timer-warn" : "text-accent";
-
   const strokeColor = isFocus ? "hsl(var(--primary))" : "hsl(var(--timer-warn))";
-  const glowShadow = isFocus
-    ? "0 0 30px hsl(var(--timer-glow) / 0.4)"
-    : "0 0 30px hsl(var(--timer-warn) / 0.4)";
 
   return (
     <div className="relative flex items-center justify-center">
-      {isRunning && (
-        <motion.div
-          className="absolute rounded-full"
-          style={{ width: size + 40, height: size + 40, boxShadow: glowShadow }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-      )}
-
       <svg width={size} height={size} className="transform -rotate-90">
         <circle
           cx={size / 2}
@@ -52,7 +38,7 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           stroke="hsl(var(--border))"
           strokeWidth={strokeWidth}
         />
-        <motion.circle
+        <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -61,27 +47,20 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          strokeDashoffset={strokeDashoffset}
+          style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
         />
       </svg>
 
       <div className="absolute flex flex-col items-center">
-        <motion.span
-          className={`font-mono text-6xl font-bold tracking-wider ${colorClass}`}
-          key={formatted}
-          initial={{ scale: 1 }}
-          animate={{ scale: isRunning ? [1, 1.02, 1] : 1 }}
-          transition={{ duration: 1, repeat: isRunning ? Infinity : 0 }}
-        >
+        <span className={`font-mono text-5xl font-bold tracking-wider ${colorClass}`}>
           {formatted}
-        </motion.span>
-        <span className="mt-1 text-sm uppercase tracking-[0.3em] text-muted-foreground">
+        </span>
+        <span className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">
           {mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break"}
         </span>
         {timeLeft > 0 && (
-          <span className="mt-1.5 font-mono text-[11px] text-muted-foreground/70">
+          <span className="mt-1 font-mono text-[10px] text-muted-foreground/60">
             ends at {getEndTime(timeLeft)}
           </span>
         )}
