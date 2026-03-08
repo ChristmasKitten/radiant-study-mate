@@ -235,6 +235,7 @@ const Index = () => {
                 allTimeTotalSeconds={timer.allTimeTotalSeconds}
                 bestDaySeconds={timer.bestDayRecord?.totalSeconds ?? 0}
                 currentSubject={timer.currentSubject}
+                subjects={timer.subjects}
                 subjectTimes={timer.subjectTimes}
               />
 
