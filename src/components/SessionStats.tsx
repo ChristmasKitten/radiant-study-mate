@@ -10,6 +10,7 @@ interface SessionStatsProps {
   currentSubject: string;
   subjects: string[];
   subjectTimes: SubjectTime[];
+  currentStreak: number;
 }
 
 function formatTime(seconds: number) {
