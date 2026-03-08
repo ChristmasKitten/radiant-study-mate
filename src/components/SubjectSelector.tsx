@@ -63,26 +63,24 @@ export function SubjectSelector({
             const isActive = currentSubject === subject;
 
             return (
-              <button
-                key={subject}
-                onClick={() => !disabled && onSelect(subject)}
-                className={`group relative flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "border-transparent text-primary-foreground"
-                    : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
-                style={isActive && color ? { backgroundColor: color } : undefined}
-                type="button"
-              >
-                <span className="truncate">{subject}</span>
+              <div key={subject} className="group relative">
+                <button
+                  onClick={() => !disabled && onSelect(subject)}
+                  className={`flex min-w-[106px] items-center justify-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "border-transparent text-primary-foreground"
+                      : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  style={isActive && color ? { backgroundColor: color } : undefined}
+                  type="button"
+                >
+                  <span className="truncate">{subject}</span>
+                </button>
 
                 {!disabled && subjects.length > 1 && (
                   <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteTarget(subject);
-                    }}
-                    className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground group-hover:flex"
+                    onClick={() => setDeleteTarget(subject)}
+                    className="absolute -right-1 -top-1 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground group-hover:flex"
                   >
                     <X className="h-2.5 w-2.5" />
                   </span>
@@ -92,11 +90,8 @@ export function SubjectSelector({
                   <Popover open={colorTarget === subject} onOpenChange={(open) => setColorTarget(open ? subject : null)}>
                     <PopoverTrigger asChild>
                       <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setColorTarget(subject);
-                        }}
-                        className="absolute -left-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted-foreground group-hover:flex"
+                        onClick={() => setColorTarget(subject)}
+                        className="absolute -left-1 -top-1 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-muted-foreground group-hover:flex"
                       >
                         <Palette className="h-2.5 w-2.5" />
                       </span>
@@ -107,8 +102,7 @@ export function SubjectSelector({
                         {(palette ?? []).map((c) => (
                           <button
                             key={c}
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            onClick={() => {
                               onColorChange(subject, c);
                               setColorTarget(null);
                             }}
@@ -123,7 +117,7 @@ export function SubjectSelector({
                     </PopoverContent>
                   </Popover>
                 )}
-              </button>
+              </div>
             );
           })}
 
@@ -157,8 +151,6 @@ export function SubjectSelector({
             </button>
           )}
         </div>
-
-        
       </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
