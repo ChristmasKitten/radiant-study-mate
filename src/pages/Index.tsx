@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, BarChart3, ListTodo } from "lucide-react";
+import { BookOpen, BarChart3, ListTodo, FileText } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
 import { useInactivityMode } from "@/hooks/useInactivityMode";
+import { useGamification } from "@/hooks/useGamification";
+import { useExamCountdown } from "@/hooks/useExamCountdown";
+import { useReminders } from "@/hooks/useReminders";
 import { toast } from "@/hooks/use-toast";
 import { getSessionReminderQuote } from "@/lib/motivationalQuotes";
+import { fireSessionComplete, fireLevelUp } from "@/lib/celebrations";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";
@@ -18,15 +22,22 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { TaskList } from "@/components/TaskList";
 import { MotivationalQuote } from "@/components/MotivationalQuote";
 import { FocusMediaEmbed } from "@/components/FocusMediaEmbed";
+import { GamificationBar } from "@/components/GamificationBar";
+import { ExamCountdown } from "@/components/ExamCountdown";
+import { WeeklyReport } from "@/components/WeeklyReport";
 import { Button } from "@/components/ui/button";
 
-type View = "timer" | "analytics" | "tasks";
+type View = "timer" | "analytics" | "tasks" | "report";
 
 const Index = () => {
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
   const taskList = useTaskList();
+  const gamification = useGamification();
+  const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
+
+  useReminders({ isRunning: timer.isRunning });
 
   const pendingForCurrent = taskList.pendingCount(timer.currentSubject);
   const inactivityMode = useInactivityMode({
@@ -34,6 +45,27 @@ const Index = () => {
     enabled: view === "timer" && timer.isRunning,
   });
   const hideChrome = view === "timer" && inactivityMode;
+
+  const prevLevelRef = useRef(gamification.level);
+
+  // Listen for session complete events
+  useEffect(() => {
+    const handler = () => {
+      fireSessionComplete();
+      const prevLevel = prevLevelRef.current;
+      gamification.awardSessionXP();
+      // Check level up after a tick
+      setTimeout(() => {
+        if (gamification.level > prevLevel) {
+          fireLevelUp();
+          toast({ title: "🎉 Level Up!", description: `You reached Level ${gamification.level}!` });
+        }
+        prevLevelRef.current = gamification.level;
+      }, 100);
+    };
+    window.addEventListener("studyflow:session-complete", handler);
+    return () => window.removeEventListener("studyflow:session-complete", handler);
+  }, [gamification]);
 
   const handleStart = () => {
     const quote = getSessionReminderQuote();
@@ -87,6 +119,14 @@ const Index = () => {
             >
               <BarChart3 className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setView((v) => (v === "report" ? "timer" : "report"))}
+              className={`h-9 w-9 rounded-full ${view === "report" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <FileText className="h-4 w-4" />
+            </Button>
             <SettingsPanel
               durations={timer.customDurations}
               onDurationsChange={timer.setCustomDurations}
@@ -117,6 +157,23 @@ const Index = () => {
               subjectTimes={timer.subjectTimes}
             />
           </motion.div>
+        ) : view === "report" ? (
+          <motion.div
+            key="report"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full flex flex-col items-center"
+          >
+            <WeeklyReport
+              dailyRecords={timer.dailyRecords}
+              subjectTimes={timer.subjectTimes}
+              currentStreak={gamification.currentStreak}
+              level={gamification.level}
+              xp={gamification.xp}
+              getSubjectColor={gamification.getSubjectColor}
+            />
+          </motion.div>
         ) : view === "tasks" ? (
           <motion.div
             key="tasks"
@@ -132,6 +189,9 @@ const Index = () => {
               onAdd={timer.addSubject}
               onRemove={timer.removeSubject}
               disabled={false}
+              getSubjectColor={gamification.getSubjectColor}
+              onColorChange={gamification.setSubjectColor}
+              palette={gamification.palette}
             />
             <TaskList
               subject={timer.currentSubject}
@@ -171,6 +231,18 @@ const Index = () => {
                   <MotivationalQuote />
                 </div>
 
+                <div className="mb-4">
+                  <GamificationBar
+                    xp={gamification.xp}
+                    level={gamification.level}
+                    levelProgress={gamification.levelProgress}
+                    xpInCurrentLevel={gamification.xpInCurrentLevel}
+                    xpNeededForNext={gamification.xpNeededForNext}
+                    currentStreak={gamification.currentStreak}
+                    longestStreak={gamification.longestStreak}
+                  />
+                </div>
+
                 <div className="mb-5">
                   <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
                 </div>
@@ -183,6 +255,9 @@ const Index = () => {
                     onAdd={timer.addSubject}
                     onRemove={timer.removeSubject}
                     disabled={timer.isRunning}
+                    getSubjectColor={gamification.getSubjectColor}
+                    onColorChange={gamification.setSubjectColor}
+                    palette={gamification.palette}
                   />
                 </div>
 
@@ -212,6 +287,14 @@ const Index = () => {
                   currentSubject={timer.currentSubject}
                   subjectTimes={timer.subjectTimes}
                 />
+
+                <div className="mt-4">
+                  <ExamCountdown
+                    exams={examCountdown.exams}
+                    onAdd={examCountdown.addExam}
+                    onRemove={examCountdown.removeExam}
+                  />
+                </div>
 
                 <div className="mt-4">
                   <FocusMediaEmbed />
