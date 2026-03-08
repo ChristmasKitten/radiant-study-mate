@@ -226,7 +226,7 @@ export function useStudyTimer() {
   }, []);
 
   const setCurrentSubject = useCallback((subject: string) => {
-    setState((prev) => ({ ...prev, currentSubject: subject }));
+    setState((prev) => (prev.isRunning ? prev : { ...prev, currentSubject: subject }));
   }, []);
 
   const addSubject = useCallback((subject: string) => {
