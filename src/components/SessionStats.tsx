@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Clock, Flame, Target, Timer, BookOpen } from "lucide-react";
+import { Clock, Flame, Target, Timer } from "lucide-react";
 import { SubjectTime } from "@/hooks/useStudyTimer";
 
 interface SessionStatsProps {
@@ -28,58 +27,15 @@ export function SessionStats({
   subjects,
   subjectTimes,
 }: SessionStatsProps) {
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-
-  const viewing = selectedSubject ?? currentSubject;
-  const isAll = viewing === "__all__";
-
-  const viewSubjectTime = isAll
-    ? {
-        totalSeconds: subjectTimes.reduce((s, t) => s + t.totalSeconds, 0),
-        sessions: subjectTimes.reduce((s, t) => s + t.sessions, 0),
-      }
-    : subjectTimes.find((s) => s.subject === viewing) ?? { totalSeconds: 0, sessions: 0 };
-
-  const options = ["__all__", ...subjects];
+  const subjectTime = subjectTimes.find((s) => s.subject === currentSubject) ?? { totalSeconds: 0, sessions: 0 };
 
   return (
-    <div className="w-full max-w-md space-y-2.5">
-      <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-primary/10 p-4">
-        <div className="absolute -right-6 -top-8 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-        <div className="relative">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-primary" />
-              <p className="text-[10px] uppercase tracking-widest text-primary/80">
-                {isAll ? "All Subjects" : viewing}
-              </p>
-            </div>
-
-            <select
-              value={viewing}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="rounded-md border border-primary/20 bg-card/70 px-2 py-0.5 text-xs text-foreground outline-none"
-            >
-              {options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt === "__all__" ? "All Subjects" : opt}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-primary/20 bg-card/70 p-3">
-              <p className="font-mono text-base font-bold text-primary">
-                {formatTime(viewSubjectTime.totalSeconds)}
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Focused</p>
-            </div>
-            <div className="rounded-lg border border-primary/20 bg-card/70 p-3">
-              <p className="font-mono text-base font-bold text-primary">{viewSubjectTime.sessions}</p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sessions</p>
-            </div>
-          </div>
+    <div className="w-full max-w-md space-y-2">
+      <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-2">
+        <span className="text-xs font-medium text-primary">{currentSubject}</span>
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-xs text-foreground">{formatTime(subjectTime.totalSeconds)}</span>
+          <span className="font-mono text-xs text-muted-foreground">{subjectTime.sessions} sessions</span>
         </div>
       </div>
 
