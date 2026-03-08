@@ -29,6 +29,13 @@ export function SessionStats({
   const currentSubjectTime = subjectTimes.find((s) => s.subject === currentSubject);
 
   const stats = [
+    {
+      icon: BookOpen,
+      label: currentSubject.length > 10 ? `${currentSubject.slice(0, 10)}…` : currentSubject,
+      value: currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m",
+      subValue: `${currentSubjectTime?.sessions ?? 0} sess`,
+      color: "text-primary",
+    },
     { icon: Target, label: "Sessions", value: sessionsCompleted, color: "text-primary" },
     { icon: Clock, label: "Today", value: formatTime(totalFocusTime), color: "text-timer-warn" },
     { icon: Timer, label: "All Time", value: formatTime(allTimeTotalSeconds), color: "text-primary" },
@@ -36,37 +43,23 @@ export function SessionStats({
   ];
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-md items-center">
-      {/* Compact subject pill */}
-      <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5">
-        <BookOpen className="h-3 w-3 text-primary shrink-0" />
-        <span className="text-[11px] font-medium text-foreground">{currentSubject}</span>
-        <span className="text-muted-foreground/40">·</span>
-        <span className="font-mono text-[11px] font-bold text-primary">
-          {currentSubjectTime ? formatTime(currentSubjectTime.totalSeconds) : "0m"}
-        </span>
-        <span className="text-muted-foreground/40">·</span>
-        <span className="font-mono text-[11px] text-muted-foreground">
-          {currentSubjectTime?.sessions ?? 0} sess
-        </span>
-      </div>
-
-      {/* General stats */}
-      <div className="grid grid-cols-4 gap-2 w-full">
-        {stats.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="flex flex-col items-center gap-1 rounded-xl bg-card border border-border p-3"
-          >
-            <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
-            <span className="font-mono text-base font-bold text-foreground">{stat.value}</span>
-            <span className="text-[9px] uppercase tracking-widest text-muted-foreground">{stat.label}</span>
-          </motion.div>
-        ))}
-      </div>
+    <div className="grid grid-cols-3 gap-2 w-full max-w-md">
+      {stats.map((stat, i) => (
+        <motion.div
+          key={stat.label}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.08 }}
+          className="flex min-h-[84px] flex-col items-center justify-center gap-1 rounded-xl bg-card border border-border p-3"
+        >
+          <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
+          <span className="font-mono text-sm font-bold text-foreground text-center leading-none">{stat.value}</span>
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground text-center leading-none">{stat.label}</span>
+          {"subValue" in stat && stat.subValue && (
+            <span className="text-[9px] text-muted-foreground/80 leading-none">{stat.subValue}</span>
+          )}
+        </motion.div>
+      ))}
     </div>
   );
 }
