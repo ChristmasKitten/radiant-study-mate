@@ -270,7 +270,6 @@ const Index = () => {
                 onRemove={taskList.removeTask}
               />
             </div>
-            </div>
           )}
         </div>
       )}
