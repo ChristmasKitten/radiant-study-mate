@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Plus, X, Clock, Calendar } from "lucide-react";
+import { Plus, X, Clock, Calendar, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 export interface ScheduleBlock {
   id: string;
@@ -9,6 +10,7 @@ export interface ScheduleBlock {
   day: string;
   startTime: string;
   endTime: string;
+  repeating: boolean;
 }
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -28,22 +30,36 @@ function saveSchedule(blocks: ScheduleBlock[]) {
 export function StudySchedule() {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>(loadSchedule);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ subject: "", day: "Mon", startTime: "09:00", endTime: "10:00" });
+  const [form, setForm] = useState({
+    subject: "",
+    days: ["Mon"] as string[],
+    startTime: "09:00",
+    endTime: "10:00",
+    repeating: true,
+  });
+
+  const toggleDay = (day: string) => {
+    setForm((f) => ({
+      ...f,
+      days: f.days.includes(day) ? f.days.filter((d) => d !== day) : [...f.days, day],
+    }));
+  };
 
   const handleAdd = () => {
-    if (!form.subject.trim()) return;
-    const newBlock: ScheduleBlock = {
-      id: Date.now().toString(),
+    if (!form.subject.trim() || form.days.length === 0) return;
+    const newBlocks: ScheduleBlock[] = form.days.map((day) => ({
+      id: `${Date.now()}-${day}`,
       subject: form.subject.trim(),
-      day: form.day,
+      day,
       startTime: form.startTime,
       endTime: form.endTime,
-    };
-    const updated = [...blocks, newBlock];
+      repeating: form.repeating,
+    }));
+    const updated = [...blocks, ...newBlocks];
     setBlocks(updated);
     saveSchedule(updated);
     setAdding(false);
-    setForm({ subject: "", day: "Mon", startTime: "09:00", endTime: "10:00" });
+    setForm({ subject: "", days: ["Mon"], startTime: "09:00", endTime: "10:00", repeating: true });
   };
 
   const handleRemove = (id: string) => {
@@ -79,29 +95,53 @@ export function StudySchedule() {
             placeholder="Subject name"
             className="h-8 text-sm rounded-lg"
           />
+
+          {/* Day multi-select */}
+          <div>
+            <p className="text-[10px] text-muted-foreground mb-1.5">Days</p>
+            <div className="flex gap-1">
+              {DAYS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleDay(d)}
+                  className={`flex-1 rounded-md py-1 text-[10px] font-medium transition-colors ${
+                    form.days.includes(d)
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-2">
-            <select
-              value={form.day}
-              onChange={(e) => setForm((f) => ({ ...f, day: e.target.value }))}
-              className="flex-1 h-8 rounded-lg border border-border bg-card px-2 text-xs text-foreground outline-none"
-            >
-              {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
             <input
               type="time"
               value={form.startTime}
               onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-              className="h-8 rounded-lg border border-border bg-card px-2 text-xs text-foreground outline-none"
+              className="flex-1 h-8 rounded-lg border border-border bg-card px-2 text-xs text-foreground outline-none"
             />
             <span className="flex items-center text-xs text-muted-foreground">→</span>
             <input
               type="time"
               value={form.endTime}
               onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-              className="h-8 rounded-lg border border-border bg-card px-2 text-xs text-foreground outline-none"
+              className="flex-1 h-8 rounded-lg border border-border bg-card px-2 text-xs text-foreground outline-none"
             />
           </div>
-          <Button size="sm" onClick={handleAdd} className="w-full h-8 rounded-lg text-xs" disabled={!form.subject.trim()}>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Repeat className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">Repeat weekly</span>
+            </div>
+            <Switch checked={form.repeating} onCheckedChange={(v) => setForm((f) => ({ ...f, repeating: v }))} />
+          </div>
+
+          <Button size="sm" onClick={handleAdd} className="w-full h-8 rounded-lg text-xs" disabled={!form.subject.trim() || form.days.length === 0}>
             Add to Schedule
           </Button>
         </div>
@@ -143,6 +183,7 @@ export function StudySchedule() {
                         {block.startTime}–{block.endTime}
                       </span>
                       <span className="text-xs font-medium text-foreground">{block.subject}</span>
+                      {block.repeating && <Repeat className="h-2.5 w-2.5 text-muted-foreground/50" />}
                       <button
                         onClick={() => handleRemove(block.id)}
                         className="ml-auto hidden h-4 w-4 items-center justify-center rounded-full text-destructive group-hover:flex"

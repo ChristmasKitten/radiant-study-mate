@@ -127,19 +127,7 @@ const Index = () => {
               longestStreak={gamification.longestStreak}
             />
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView((v) => (v === "tasks" ? "timer" : "tasks"))}
-              className={`relative h-9 w-9 rounded-full ${view === "tasks" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <ListTodo className="h-4 w-4" />
-              {pendingForCurrent > 0 && view !== "tasks" && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
-                  {pendingForCurrent}
-                </span>
-              )}
-            </Button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -212,28 +200,6 @@ const Index = () => {
         </div>
       )}
 
-      {view === "tasks" && (
-        <div className="flex w-full flex-col items-center gap-4">
-          <SubjectSelector
-            subjects={timer.subjects}
-            currentSubject={timer.currentSubject}
-            onSelect={timer.setCurrentSubject}
-            onAdd={timer.addSubject}
-            onRemove={timer.removeSubject}
-            disabled={timer.isRunning}
-            getSubjectColor={gamification.getSubjectColor}
-            onColorChange={gamification.setSubjectColor}
-            palette={gamification.palette}
-          />
-          <TaskList
-            subject={timer.currentSubject}
-            tasks={taskList.getTasksForSubject(timer.currentSubject)}
-            onAdd={taskList.addTask}
-            onToggle={taskList.toggleTask}
-            onRemove={taskList.removeTask}
-          />
-        </div>
-      )}
 
       {view === "timer" && (
         <div className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}>
@@ -296,9 +262,13 @@ const Index = () => {
                 onRemove={examCountdown.removeExam}
               />
 
-              <p className="text-xs text-muted-foreground/50">
-                {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
-              </p>
+              <TaskList
+                subject={timer.currentSubject}
+                tasks={taskList.getTasksForSubject(timer.currentSubject)}
+                onAdd={taskList.addTask}
+                onToggle={taskList.toggleTask}
+                onRemove={taskList.removeTask}
+              />
             </div>
           )}
         </div>

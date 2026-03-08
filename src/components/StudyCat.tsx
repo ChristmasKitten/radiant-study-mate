@@ -14,6 +14,7 @@ interface StudyCatProps {
 
 interface CatState {
   x: number;
+  targetX: number;
   direction: "left" | "right";
   action: CatAction;
 }
@@ -22,9 +23,7 @@ const HEART = "💕";
 
 function getMood(isRunning: boolean, mode: string, totalFocusTime: number): CatMood {
   if (!isRunning && mode !== "focus") return "sleepy";
-  if (isRunning && mode === "focus") {
-    return totalFocusTime > 1800 ? "happy" : "focused";
-  }
+  if (isRunning && mode === "focus") return totalFocusTime > 1800 ? "happy" : "focused";
   if (mode === "shortBreak" || mode === "longBreak") return "sleepy";
   return "idle";
 }
@@ -41,8 +40,7 @@ function getMoodEmoji(mood: CatMood, action: CatAction): string {
 }
 
 function getMoodBubble(mood: CatMood, action: CatAction): string | null {
-  if (action === "petted" || action === "sleeping") return null;
-  if (action === "walking") return null;
+  if (action === "petted" || action === "sleeping" || action === "walking") return null;
   switch (mood) {
     case "happy": return "⭐";
     case "focused": return "📖";
@@ -51,22 +49,25 @@ function getMoodBubble(mood: CatMood, action: CatAction): string | null {
   }
 }
 
+function randomTarget(maxX: number): number {
+  return 20 + Math.random() * Math.max(maxX - 40, 100);
+}
+
 export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
-  const [cat, setCat] = useState<CatState>({
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [cat, setCat] = useState<CatState>(() => ({
     x: 100,
+    targetX: 300,
     direction: "right",
     action: "walking",
-  });
+  }));
   const [hearts, setHearts] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const actionTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const catRef = useRef(cat);
-  catRef.current = cat;
 
   const mood = getMood(isRunning, mode, totalFocusTime);
-  const speed = mood === "sleepy" ? 0.8 : mood === "happy" ? 2.0 : 1.4;
+  const speed = mood === "sleepy" ? 0.6 : mood === "happy" ? 1.8 : 1.2;
 
-  // Movement loop using requestAnimationFrame for smooth motion
+  // Pick a new random target when cat reaches current target
   useEffect(() => {
     if (!visible) return;
     let animId: number;
@@ -80,13 +81,28 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
         lastTime = time;
         setCat((prev) => {
           if (prev.action !== "walking") return prev;
+
           const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
-          let newX = prev.x + (prev.direction === "right" ? speed : -speed);
-          let newDir = prev.direction;
-          if (newX > maxX) { newX = maxX; newDir = "left"; }
-          if (newX < 10) { newX = 10; newDir = "right"; }
-          if (newX === prev.x && newDir === prev.direction) return prev;
-          return { ...prev, x: newX, direction: newDir };
+          const dist = prev.targetX - prev.x;
+
+          // Reached target? Pick new random one and maybe pause
+          if (Math.abs(dist) < 2) {
+            const newTarget = randomTarget(maxX);
+            return {
+              ...prev,
+              targetX: newTarget,
+              direction: newTarget > prev.x ? "right" : "left",
+            };
+          }
+
+          const dir = dist > 0 ? 1 : -1;
+          const newX = prev.x + dir * speed;
+
+          return {
+            ...prev,
+            x: newX,
+            direction: dir > 0 ? "right" : "left",
+          };
         });
       }
       animId = requestAnimationFrame(move);
@@ -96,11 +112,11 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     return () => cancelAnimationFrame(animId);
   }, [visible, speed]);
 
-  // Random sit/sleep
+  // Random sit/sleep with new random target after
   useEffect(() => {
     if (!visible) return;
     const scheduleAction = () => {
-      const delay = mood === "sleepy" ? 4000 + Math.random() * 6000 : 8000 + Math.random() * 15000;
+      const delay = mood === "sleepy" ? 4000 + Math.random() * 6000 : 6000 + Math.random() * 12000;
       actionTimerRef.current = setTimeout(() => {
         setCat((prev) => {
           if (prev.action === "petted") return prev;
@@ -112,9 +128,11 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
 
         const restTime = mood === "sleepy" ? 5000 + Math.random() * 8000 : 3000 + Math.random() * 5000;
         setTimeout(() => {
+          const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
           setCat((prev) => {
             if (prev.action === "petted") return prev;
-            return { ...prev, action: "walking" };
+            const newTarget = randomTarget(maxX);
+            return { ...prev, action: "walking", targetX: newTarget, direction: newTarget > prev.x ? "right" : "left" };
           });
           scheduleAction();
         }, restTime);
@@ -130,7 +148,9 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     setHearts(true);
     setTimeout(() => {
       setHearts(false);
-      setCat((prev) => ({ ...prev, action: "walking" }));
+      const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
+      const newTarget = randomTarget(maxX);
+      setCat((prev) => ({ ...prev, action: "walking", targetX: newTarget, direction: newTarget > prev.x ? "right" : "left" }));
     }, 2000);
   }, []);
 
