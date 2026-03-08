@@ -125,6 +125,11 @@ const Index = () => {
               xpNeededForNext={gamification.xpNeededForNext}
               currentStreak={gamification.currentStreak}
               longestStreak={gamification.longestStreak}
+              totalSessions={gamification.totalSessions}
+              unlockedBadges={gamification.unlockedBadges}
+              lockedBadges={gamification.lockedBadges}
+              newBadges={gamification.newBadges}
+              onClearNewBadges={gamification.clearNewBadges}
             />
 
             {[

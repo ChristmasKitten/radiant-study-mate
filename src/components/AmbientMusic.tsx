@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Music, X, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -18,28 +18,101 @@ const TRACKS: Track[] = [
   { label: "Ocean", emoji: "🌊", url: "https://cdn.pixabay.com/audio/2022/04/27/audio_67dce6b5f8.mp3" },
 ];
 
+type NoiseColor = "white" | "pink" | "brown";
+
+interface NoiseOption {
+  id: NoiseColor;
+  label: string;
+  emoji: string;
+}
+
+const NOISE_OPTIONS: NoiseOption[] = [
+  { id: "white", label: "White", emoji: "⚪" },
+  { id: "pink", label: "Pink", emoji: "🩷" },
+  { id: "brown", label: "Brown", emoji: "🟤" },
+];
+
+function createColorNoise(ctx: AudioContext, type: NoiseColor): AudioBufferSourceNode {
+  const bufferSize = 2 * ctx.sampleRate;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  if (type === "white") {
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+  } else if (type === "pink") {
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+      b6 = white * 0.115926;
+    }
+  } else {
+    // Brown noise
+    let last = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      last = (last + 0.02 * white) / 1.02;
+      data[i] = last * 3.5;
+    }
+  }
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+  return source;
+}
+
 export function AmbientMusic() {
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [activeNoise, setActiveNoise] = useState<NoiseColor | null>(null);
   const [volume, setVolume] = useState(40);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const noiseCtxRef = useRef<AudioContext | null>(null);
+  const noiseGainRef = useRef<GainNode | null>(null);
+  const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
     }
+    if (noiseGainRef.current) {
+      noiseGainRef.current.gain.value = volume / 100;
+    }
   }, [volume]);
 
+  const stopTrack = useCallback(() => {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    setPlaying(null);
+  }, []);
+
+  const stopNoise = useCallback(() => {
+    try { noiseSourceRef.current?.stop(); } catch {}
+    noiseSourceRef.current = null;
+    noiseGainRef.current = null;
+    if (noiseCtxRef.current?.state !== "closed") {
+      noiseCtxRef.current?.close();
+    }
+    noiseCtxRef.current = null;
+    setActiveNoise(null);
+  }, []);
+
   const playTrack = (url: string) => {
+    stopNoise();
     if (playing === url) {
-      audioRef.current?.pause();
-      setPlaying(null);
+      stopTrack();
       return;
     }
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    stopTrack();
 
     const audio = new Audio(url);
     audio.loop = true;
@@ -49,16 +122,41 @@ export function AmbientMusic() {
     setPlaying(url);
   };
 
-  const stopAll = () => {
-    audioRef.current?.pause();
-    audioRef.current = null;
-    setPlaying(null);
+  const playNoise = (type: NoiseColor) => {
+    stopTrack();
+    if (activeNoise === type) {
+      stopNoise();
+      return;
+    }
+    stopNoise();
+
+    try {
+      const ctx = new AudioContext();
+      const gain = ctx.createGain();
+      gain.gain.value = volume / 100;
+      gain.connect(ctx.destination);
+      const source = createColorNoise(ctx, type);
+      source.connect(gain);
+      source.start();
+      noiseCtxRef.current = ctx;
+      noiseGainRef.current = gain;
+      noiseSourceRef.current = source;
+      setActiveNoise(type);
+    } catch {}
   };
 
-  // Cleanup on unmount
+  const stopAll = () => {
+    stopTrack();
+    stopNoise();
+  };
+
+  const isAnythingPlaying = !!playing || !!activeNoise;
+
   useEffect(() => {
     return () => {
       audioRef.current?.pause();
+      try { noiseSourceRef.current?.stop(); } catch {}
+      if (noiseCtxRef.current?.state !== "closed") noiseCtxRef.current?.close();
     };
   }, []);
 
@@ -68,7 +166,7 @@ export function AmbientMusic() {
         variant="ghost"
         size="icon"
         onClick={() => setOpen((v) => !v)}
-        className={`h-9 w-9 rounded-full ${playing ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+        className={`h-9 w-9 rounded-full ${isAnythingPlaying ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
         title="Ambient sounds"
       >
         <Music className="h-4 w-4" />
@@ -88,7 +186,8 @@ export function AmbientMusic() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-4">
+            {/* Sound tracks */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {TRACKS.map((track) => (
                 <button
                   key={track.url}
@@ -101,6 +200,25 @@ export function AmbientMusic() {
                 >
                   <span className="text-xl">{track.emoji}</span>
                   <span className="text-[10px] text-muted-foreground">{track.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Color noises */}
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Color Noise</p>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {NOISE_OPTIONS.map((noise) => (
+                <button
+                  key={noise.id}
+                  onClick={() => playNoise(noise.id)}
+                  className={`flex flex-col items-center gap-1 rounded-xl p-3 transition-colors ${
+                    activeNoise === noise.id
+                      ? "bg-primary/10 border border-primary/30"
+                      : "border border-border hover:bg-secondary"
+                  }`}
+                >
+                  <span className="text-xl">{noise.emoji}</span>
+                  <span className="text-[10px] text-muted-foreground">{noise.label}</span>
                 </button>
               ))}
             </div>
@@ -119,7 +237,7 @@ export function AmbientMusic() {
               <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
 
-            {playing && (
+            {isAnythingPlaying && (
               <Button variant="outline" size="sm" onClick={stopAll} className="w-full mt-3 rounded-lg text-xs">
                 Stop All
               </Button>

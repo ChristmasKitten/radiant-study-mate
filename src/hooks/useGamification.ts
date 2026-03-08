@@ -1,6 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 const STORAGE_KEY = "studyflow_gamification";
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  check: (data: GamificationData) => boolean;
+}
 
 export interface GamificationData {
   xp: number;
@@ -9,6 +17,8 @@ export interface GamificationData {
   longestStreak: number;
   lastStudyDate: string | null;
   subjectColors: Record<string, string>;
+  totalSessions: number;
+  unlockedBadges: string[];
 }
 
 const XP_PER_SESSION = 50;
@@ -30,10 +40,28 @@ const PALETTE = [
   "#ec4899", "#f43f5e",
 ];
 
+export const ALL_BADGES: Badge[] = [
+  { id: "first_session", name: "First Step", description: "Complete your first session", emoji: "🌱", check: (d) => d.totalSessions >= 1 },
+  { id: "10_sessions", name: "Dedicated", description: "Complete 10 sessions", emoji: "📚", check: (d) => d.totalSessions >= 10 },
+  { id: "50_sessions", name: "Scholar", description: "Complete 50 sessions", emoji: "🎓", check: (d) => d.totalSessions >= 50 },
+  { id: "100_sessions", name: "Master", description: "Complete 100 sessions", emoji: "🏆", check: (d) => d.totalSessions >= 100 },
+  { id: "streak_3", name: "On Fire", description: "3-day study streak", emoji: "🔥", check: (d) => d.longestStreak >= 3 },
+  { id: "streak_7", name: "Weekly Warrior", description: "7-day study streak", emoji: "⚡", check: (d) => d.longestStreak >= 7 },
+  { id: "streak_14", name: "Unstoppable", description: "14-day study streak", emoji: "💪", check: (d) => d.longestStreak >= 14 },
+  { id: "streak_30", name: "Legend", description: "30-day study streak", emoji: "👑", check: (d) => d.longestStreak >= 30 },
+  { id: "level_5", name: "Rising Star", description: "Reach level 5", emoji: "⭐", check: (d) => d.level >= 5 },
+  { id: "level_10", name: "Powerhouse", description: "Reach level 10", emoji: "💎", check: (d) => d.level >= 10 },
+  { id: "xp_1000", name: "XP Hunter", description: "Earn 1,000 XP", emoji: "✨", check: (d) => d.xp >= 1000 },
+  { id: "xp_5000", name: "XP Legend", description: "Earn 5,000 XP", emoji: "🌟", check: (d) => d.xp >= 5000 },
+];
+
 function loadData(): GamificationData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { totalSessions: 0, unlockedBadges: [], ...parsed };
+    }
   } catch {}
   return {
     xp: 0,
@@ -42,6 +70,8 @@ function loadData(): GamificationData {
     longestStreak: 0,
     lastStudyDate: null,
     subjectColors: { ...DEFAULT_SUBJECT_COLORS },
+    totalSessions: 0,
+    unlockedBadges: [],
   };
 }
 
@@ -61,12 +91,23 @@ function getYesterday() {
   return d.toISOString().split("T")[0];
 }
 
+function checkBadges(data: GamificationData): string[] {
+  const newlyUnlocked: string[] = [];
+  for (const badge of ALL_BADGES) {
+    if (!data.unlockedBadges.includes(badge.id) && badge.check(data)) {
+      newlyUnlocked.push(badge.id);
+    }
+  }
+  return newlyUnlocked;
+}
+
 export function xpForLevel(level: number) {
   return level * XP_PER_LEVEL;
 }
 
 export function useGamification() {
   const [data, setData] = useState<GamificationData>(loadData);
+  const [newBadges, setNewBadges] = useState<string[]>([]);
 
   useEffect(() => {
     saveData(data);
@@ -93,20 +134,42 @@ export function useGamification() {
         newLevel++;
       }
 
-      return {
+      const updated: GamificationData = {
         ...prev,
         xp: newXP,
         level: newLevel,
         currentStreak: streak,
         longestStreak: Math.max(prev.longestStreak, streak),
         lastStudyDate: today,
+        totalSessions: prev.totalSessions + 1,
       };
+
+      const newlyUnlocked = checkBadges(updated);
+      if (newlyUnlocked.length > 0) {
+        updated.unlockedBadges = [...updated.unlockedBadges, ...newlyUnlocked];
+        // We'll surface these via a separate state
+        setTimeout(() => setNewBadges(newlyUnlocked), 0);
+      }
+
+      return updated;
     });
   }, []);
+
+  const clearNewBadges = useCallback(() => setNewBadges([]), []);
 
   const xpInCurrentLevel = data.xp - (data.level > 1 ? xpForLevel(data.level - 1) : 0);
   const xpNeededForNext = xpForLevel(data.level) - (data.level > 1 ? xpForLevel(data.level - 1) : 0);
   const levelProgress = xpNeededForNext > 0 ? xpInCurrentLevel / xpNeededForNext : 0;
+
+  const unlockedBadges = useMemo(
+    () => ALL_BADGES.filter((b) => data.unlockedBadges.includes(b.id)),
+    [data.unlockedBadges]
+  );
+
+  const lockedBadges = useMemo(
+    () => ALL_BADGES.filter((b) => !data.unlockedBadges.includes(b.id)),
+    [data.unlockedBadges]
+  );
 
   const getSubjectColor = useCallback(
     (subject: string) => {
@@ -131,6 +194,10 @@ export function useGamification() {
     getSubjectColor,
     setSubjectColor,
     palette: PALETTE,
+    unlockedBadges,
+    lockedBadges,
+    newBadges,
+    clearNewBadges,
   };
 }
 
