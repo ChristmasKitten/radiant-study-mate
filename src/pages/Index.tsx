@@ -37,7 +37,7 @@ const Index = () => {
   const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
   const [focusMode, setFocusMode] = useState(false);
-  const [catVisible, setCatVisible] = useState(true);
+  const [catVisible, setCatVisible] = useState(false);
 
   useReminders({ isRunning: timer.isRunning });
 
