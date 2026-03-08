@@ -7,6 +7,13 @@ interface StudyCalendarProps {
   dailyRecords: DailyRecord[];
 }
 
+function formatTime(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h${m > 0 ? m : ""}`;
+  return `${m}m`;
+}
+
 export function StudyCalendar({ dailyRecords }: StudyCalendarProps) {
   const recordMap = useMemo(() => {
     const map: Record<string, DailyRecord> = {};
@@ -18,15 +25,22 @@ export function StudyCalendar({ dailyRecords }: StudyCalendarProps) {
     return dailyRecords.map((r) => new Date(r.date + "T00:00:00"));
   }, [dailyRecords]);
 
-  const maxSeconds = useMemo(() => {
-    return Math.max(...dailyRecords.map((r) => r.totalSeconds), 1);
+  // Build a lookup from "YYYY-MM-DD" to formatted time string
+  const timeByDate = useMemo(() => {
+    const map: Record<string, string> = {};
+    dailyRecords.forEach((r) => {
+      if (r.totalSeconds > 0) {
+        map[r.date] = formatTime(r.totalSeconds);
+      }
+    });
+    return map;
   }, [dailyRecords]);
 
-  function formatTime(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    if (h > 0) return `${h}h ${m}m`;
-    return `${m}m`;
+  function toDateKey(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
   }
 
   return (
@@ -43,6 +57,20 @@ export function StudyCalendar({ dailyRecords }: StudyCalendarProps) {
           studied: "bg-primary/20 text-primary font-bold",
         }}
         disabled={() => true}
+        components={{
+          DayContent: ({ date }) => {
+            const key = toDateKey(date);
+            const time = timeByDate[key];
+            return (
+              <div className="flex flex-col items-center leading-none">
+                <span>{date.getDate()}</span>
+                {time && (
+                  <span className="text-[7px] font-normal text-primary/70 leading-none mt-0.5">{time}</span>
+                )}
+              </div>
+            );
+          },
+        }}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
           month: "space-y-3 w-full",
@@ -55,7 +83,7 @@ export function StudyCalendar({ dailyRecords }: StudyCalendarProps) {
           head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-[10px] uppercase",
           row: "flex w-full mt-1",
           cell: "flex-1 text-center text-xs p-0 relative focus-within:relative focus-within:z-20",
-          day: "h-7 w-full p-0 font-normal text-[11px] rounded-md",
+          day: "h-10 w-full p-0 font-normal text-[11px] rounded-md",
           day_today: "border border-primary/50 text-primary",
           day_outside: "text-muted-foreground/30",
           day_disabled: "cursor-default",
