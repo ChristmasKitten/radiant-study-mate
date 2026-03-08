@@ -183,6 +183,11 @@ export function useStudyTimer() {
               osc.stop(ctx.currentTime + 0.3);
             } catch {}
 
+            // Notify listeners (for celebrations)
+            if (wasFocus) {
+              window.dispatchEvent(new CustomEvent("studyflow:session-complete"));
+            }
+
             return {
               ...prev,
               mode: nextMode,
