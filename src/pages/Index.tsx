@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, BarChart3, ListTodo, FileText } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
@@ -20,7 +19,6 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TaskList } from "@/components/TaskList";
-import { FocusMediaEmbed } from "@/components/FocusMediaEmbed";
 import { GamificationBar } from "@/components/GamificationBar";
 import { ExamCountdown } from "@/components/ExamCountdown";
 import { WeeklyReport } from "@/components/WeeklyReport";
@@ -81,12 +79,25 @@ const Index = () => {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <BookOpen className="h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Study<span className="text-primary">Flow</span>
-            </h1>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground">
+                Study<span className="text-primary">Flow</span>
+              </h1>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{timer.currentSubject}</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-1">
+            <GamificationBar
+              xp={gamification.xp}
+              level={gamification.level}
+              levelProgress={gamification.levelProgress}
+              xpInCurrentLevel={gamification.xpInCurrentLevel}
+              xpNeededForNext={gamification.xpNeededForNext}
+              currentStreak={gamification.currentStreak}
+              longestStreak={gamification.longestStreak}
+            />
+
             <Button
               variant="ghost"
               size="icon"
@@ -128,153 +139,121 @@ const Index = () => {
         </div>
       )}
 
-      <AnimatePresence mode="wait">
-        {view === "analytics" ? (
-          <motion.div
-            key="analytics"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full flex flex-col items-center"
-          >
-            <AnalyticsPanel
-              dailyRecords={timer.dailyRecords}
-              last7Days={timer.last7Days}
-              bestDayRecord={timer.bestDayRecord}
-              avgDailyTime={timer.avgDailyTime}
-              allTimeTotalSeconds={timer.allTimeTotalSeconds}
-              subjectTimes={timer.subjectTimes}
-            />
-          </motion.div>
-        ) : view === "report" ? (
-          <motion.div
-            key="report"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full flex flex-col items-center"
-          >
-            <WeeklyReport
-              dailyRecords={timer.dailyRecords}
-              subjectTimes={timer.subjectTimes}
-              currentStreak={gamification.currentStreak}
-              level={gamification.level}
-              xp={gamification.xp}
-              getSubjectColor={gamification.getSubjectColor}
-            />
-          </motion.div>
-        ) : view === "tasks" ? (
-          <motion.div
-            key="tasks"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full flex flex-col items-center gap-4"
-          >
-            <SubjectSelector
-              subjects={timer.subjects}
-              currentSubject={timer.currentSubject}
-              onSelect={timer.setCurrentSubject}
-              onAdd={timer.addSubject}
-              onRemove={timer.removeSubject}
-              disabled={false}
-              getSubjectColor={gamification.getSubjectColor}
-              onColorChange={gamification.setSubjectColor}
-              palette={gamification.palette}
-            />
-            <TaskList
-              subject={timer.currentSubject}
-              tasks={taskList.getTasksForSubject(timer.currentSubject)}
-              onAdd={taskList.addTask}
-              onToggle={taskList.toggleTask}
-              onRemove={taskList.removeTask}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="timer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}
-          >
-            {inactivityMode ? (
-              <div className="flex flex-col items-center">
-                <CircularTimer
-                  timeLeft={timer.timeLeft}
-                  progress={timer.progress}
-                  mode={timer.mode}
-                  isRunning={timer.isRunning}
-                />
-                <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Move mouse or press a key to return
-                </p>
-              </div>
-            ) : (
-              <div className="flex w-full flex-col items-center gap-5">
-                <GamificationBar
-                  xp={gamification.xp}
-                  level={gamification.level}
-                  levelProgress={gamification.levelProgress}
-                  xpInCurrentLevel={gamification.xpInCurrentLevel}
-                  xpNeededForNext={gamification.xpNeededForNext}
-                  currentStreak={gamification.currentStreak}
-                  longestStreak={gamification.longestStreak}
-                />
+      {view === "analytics" && (
+        <div className="flex w-full flex-col items-center">
+          <AnalyticsPanel
+            dailyRecords={timer.dailyRecords}
+            last7Days={timer.last7Days}
+            bestDayRecord={timer.bestDayRecord}
+            avgDailyTime={timer.avgDailyTime}
+            allTimeTotalSeconds={timer.allTimeTotalSeconds}
+            subjectTimes={timer.subjectTimes}
+          />
+        </div>
+      )}
 
-                <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
+      {view === "report" && (
+        <div className="flex w-full flex-col items-center">
+          <WeeklyReport
+            dailyRecords={timer.dailyRecords}
+            subjectTimes={timer.subjectTimes}
+            currentStreak={gamification.currentStreak}
+            level={gamification.level}
+            xp={gamification.xp}
+            getSubjectColor={gamification.getSubjectColor}
+          />
+        </div>
+      )}
 
-                <SubjectSelector
-                  subjects={timer.subjects}
-                  currentSubject={timer.currentSubject}
-                  onSelect={timer.setCurrentSubject}
-                  onAdd={timer.addSubject}
-                  onRemove={timer.removeSubject}
-                  disabled={timer.isRunning}
-                  getSubjectColor={gamification.getSubjectColor}
-                  onColorChange={gamification.setSubjectColor}
-                  palette={gamification.palette}
-                />
+      {view === "tasks" && (
+        <div className="flex w-full flex-col items-center gap-4">
+          <SubjectSelector
+            subjects={timer.subjects}
+            currentSubject={timer.currentSubject}
+            onSelect={timer.setCurrentSubject}
+            onAdd={timer.addSubject}
+            onRemove={timer.removeSubject}
+            disabled={timer.isRunning}
+            getSubjectColor={gamification.getSubjectColor}
+            onColorChange={gamification.setSubjectColor}
+            palette={gamification.palette}
+          />
+          <TaskList
+            subject={timer.currentSubject}
+            tasks={taskList.getTasksForSubject(timer.currentSubject)}
+            onAdd={taskList.addTask}
+            onToggle={taskList.toggleTask}
+            onRemove={taskList.removeTask}
+          />
+        </div>
+      )}
 
-                <CircularTimer
-                  timeLeft={timer.timeLeft}
-                  progress={timer.progress}
-                  mode={timer.mode}
-                  isRunning={timer.isRunning}
-                />
+      {view === "timer" && (
+        <div className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}>
+          {inactivityMode ? (
+            <div className="flex flex-col items-center">
+              <CircularTimer
+                timeLeft={timer.timeLeft}
+                progress={timer.progress}
+                mode={timer.mode}
+                isRunning={timer.isRunning}
+              />
+              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Move mouse or press a key to return
+              </p>
+            </div>
+          ) : (
+            <div className="flex w-full flex-col items-center gap-5">
+              <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
 
-                <TimerControls
-                  isRunning={timer.isRunning}
-                  onStart={handleStart}
-                  onPause={timer.pause}
-                  onReset={timer.reset}
-                />
+              <SubjectSelector
+                subjects={timer.subjects}
+                currentSubject={timer.currentSubject}
+                onSelect={timer.setCurrentSubject}
+                onAdd={timer.addSubject}
+                onRemove={timer.removeSubject}
+                disabled={timer.isRunning}
+                getSubjectColor={gamification.getSubjectColor}
+                onColorChange={gamification.setSubjectColor}
+                palette={gamification.palette}
+              />
 
-                <SessionStats
-                  sessionsCompleted={timer.sessionsCompleted}
-                  totalFocusTime={timer.totalFocusTime}
-                  allTimeTotalSeconds={timer.allTimeTotalSeconds}
-                  bestDaySeconds={timer.bestDayRecord?.totalSeconds ?? 0}
-                  currentSubject={timer.currentSubject}
-                  subjectTimes={timer.subjectTimes}
-                />
+              <CircularTimer
+                timeLeft={timer.timeLeft}
+                progress={timer.progress}
+                mode={timer.mode}
+                isRunning={timer.isRunning}
+              />
 
-                <ExamCountdown
-                  exams={examCountdown.exams}
-                  onAdd={examCountdown.addExam}
-                  onRemove={examCountdown.removeExam}
-                />
+              <TimerControls
+                isRunning={timer.isRunning}
+                onStart={handleStart}
+                onPause={timer.pause}
+                onReset={timer.reset}
+              />
 
-                <FocusMediaEmbed />
+              <SessionStats
+                sessionsCompleted={timer.sessionsCompleted}
+                totalFocusTime={timer.totalFocusTime}
+                allTimeTotalSeconds={timer.allTimeTotalSeconds}
+                bestDaySeconds={timer.bestDayRecord?.totalSeconds ?? 0}
+                currentSubject={timer.currentSubject}
+                subjectTimes={timer.subjectTimes}
+              />
 
-                <p className="text-xs text-muted-foreground/50">
-                  {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
-                </p>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <ExamCountdown
+                exams={examCountdown.exams}
+                onAdd={examCountdown.addExam}
+                onRemove={examCountdown.removeExam}
+              />
+
+              <p className="text-xs text-muted-foreground/50">
+                {timer.customDurations.focus}min focus • {timer.customDurations.shortBreak}min break • Data saved locally
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
