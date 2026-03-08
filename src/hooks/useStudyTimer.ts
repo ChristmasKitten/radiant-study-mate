@@ -8,12 +8,27 @@ export interface SubjectTime {
   sessions: number;
 }
 
+export interface DailyRecord {
+  date: string; // YYYY-MM-DD
+  totalSeconds: number;
+  sessions: number;
+}
+
+export interface CustomDurations {
+  focus: number;
+  shortBreak: number;
+  longBreak: number;
+}
+
 interface PersistedData {
   sessionsCompleted: number;
   totalFocusTime: number;
   subjects: string[];
   subjectTimes: SubjectTime[];
   allTimeTotalSeconds: number;
+  dailyRecords: DailyRecord[];
+  customDurations: CustomDurations;
+  todayDate: string;
 }
 
 interface TimerState {
@@ -26,15 +41,22 @@ interface TimerState {
   subjects: string[];
   subjectTimes: SubjectTime[];
   allTimeTotalSeconds: number;
+  dailyRecords: DailyRecord[];
+  customDurations: CustomDurations;
+  todayDate: string;
 }
 
-const DURATIONS: Record<TimerMode, number> = {
-  focus: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60,
+const DEFAULT_DURATIONS: CustomDurations = {
+  focus: 25,
+  shortBreak: 5,
+  longBreak: 15,
 };
 
 const STORAGE_KEY = "studyflow_data";
+
+function getToday(): string {
+  return new Date().toISOString().split("T")[0];
+}
 
 function loadPersistedData(): Partial<PersistedData> {
   try {
@@ -54,21 +76,29 @@ const DEFAULT_SUBJECTS = ["Math", "Science", "English", "History"];
 
 export function useStudyTimer() {
   const persisted = loadPersistedData();
+  const today = getToday();
+
+  // Reset today's stats if date changed
+  const isNewDay = persisted.todayDate !== today;
+
+  const durations = persisted.customDurations ?? DEFAULT_DURATIONS;
 
   const [state, setState] = useState<TimerState>({
     mode: "focus",
-    timeLeft: DURATIONS.focus,
+    timeLeft: durations.focus * 60,
     isRunning: false,
-    sessionsCompleted: persisted.sessionsCompleted ?? 0,
-    totalFocusTime: persisted.totalFocusTime ?? 0,
+    sessionsCompleted: isNewDay ? 0 : (persisted.sessionsCompleted ?? 0),
+    totalFocusTime: isNewDay ? 0 : (persisted.totalFocusTime ?? 0),
     currentSubject: persisted.subjects?.[0] ?? DEFAULT_SUBJECTS[0],
     subjects: persisted.subjects?.length ? persisted.subjects : DEFAULT_SUBJECTS,
     subjectTimes: persisted.subjectTimes ?? [],
     allTimeTotalSeconds: persisted.allTimeTotalSeconds ?? 0,
+    dailyRecords: persisted.dailyRecords ?? [],
+    customDurations: durations,
+    todayDate: today,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const elapsedThisSession = useRef<number>(0);
 
   // Persist on changes
   useEffect(() => {
@@ -78,8 +108,15 @@ export function useStudyTimer() {
       subjects: state.subjects,
       subjectTimes: state.subjectTimes,
       allTimeTotalSeconds: state.allTimeTotalSeconds,
+      dailyRecords: state.dailyRecords,
+      customDurations: state.customDurations,
+      todayDate: state.todayDate,
     });
-  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds]);
+  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds, state.dailyRecords, state.customDurations, state.todayDate]);
+
+  const getDurationSeconds = useCallback((mode: TimerMode, dur: CustomDurations) => {
+    return dur[mode] * 60;
+  }, []);
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -92,15 +129,10 @@ export function useStudyTimer() {
     if (state.isRunning && state.timeLeft > 0) {
       intervalRef.current = setInterval(() => {
         setState((prev) => {
-          // Track elapsed time for focus sessions
-          if (prev.mode === "focus") {
-            elapsedThisSession.current += 1;
-          }
-
           if (prev.timeLeft <= 1) {
             const wasFocus = prev.mode === "focus";
             const newSessions = wasFocus ? prev.sessionsCompleted + 1 : prev.sessionsCompleted;
-            const sessionDuration = wasFocus ? DURATIONS.focus : 0;
+            const sessionDuration = wasFocus ? prev.customDurations.focus * 60 : 0;
             const newTotal = prev.totalFocusTime + sessionDuration;
             const newAllTime = prev.allTimeTotalSeconds + sessionDuration;
             const nextMode: TimerMode = wasFocus
@@ -122,6 +154,22 @@ export function useStudyTimer() {
               }
             }
 
+            // Update daily record
+            let newDailyRecords = [...prev.dailyRecords];
+            if (wasFocus) {
+              const todayStr = getToday();
+              const dayIdx = newDailyRecords.findIndex((d) => d.date === todayStr);
+              if (dayIdx >= 0) {
+                newDailyRecords[dayIdx] = {
+                  ...newDailyRecords[dayIdx],
+                  totalSeconds: newDailyRecords[dayIdx].totalSeconds + sessionDuration,
+                  sessions: newDailyRecords[dayIdx].sessions + 1,
+                };
+              } else {
+                newDailyRecords.push({ date: todayStr, totalSeconds: sessionDuration, sessions: 1 });
+              }
+            }
+
             // Play sound
             try {
               const ctx = new AudioContext();
@@ -135,17 +183,16 @@ export function useStudyTimer() {
               osc.stop(ctx.currentTime + 0.3);
             } catch {}
 
-            elapsedThisSession.current = 0;
-
             return {
               ...prev,
               mode: nextMode,
-              timeLeft: DURATIONS[nextMode],
+              timeLeft: prev.customDurations[nextMode] * 60,
               isRunning: false,
               sessionsCompleted: newSessions,
               totalFocusTime: newTotal,
               allTimeTotalSeconds: newAllTime,
               subjectTimes: newSubjectTimes,
+              dailyRecords: newDailyRecords,
             };
           }
           return { ...prev, timeLeft: prev.timeLeft - 1 };
@@ -158,7 +205,6 @@ export function useStudyTimer() {
   }, [state.isRunning, clearTimer]);
 
   const start = useCallback(() => {
-    elapsedThisSession.current = 0;
     setState((prev) => ({ ...prev, isRunning: true }));
   }, []);
 
@@ -167,13 +213,11 @@ export function useStudyTimer() {
   }, []);
 
   const reset = useCallback(() => {
-    elapsedThisSession.current = 0;
-    setState((prev) => ({ ...prev, timeLeft: DURATIONS[prev.mode], isRunning: false }));
+    setState((prev) => ({ ...prev, timeLeft: prev.customDurations[prev.mode] * 60, isRunning: false }));
   }, []);
 
   const setMode = useCallback((mode: TimerMode) => {
-    elapsedThisSession.current = 0;
-    setState((prev) => ({ ...prev, mode, timeLeft: DURATIONS[mode], isRunning: false }));
+    setState((prev) => ({ ...prev, mode, timeLeft: prev.customDurations[mode] * 60, isRunning: false }));
   }, []);
 
   const setCurrentSubject = useCallback((subject: string) => {
@@ -201,7 +245,37 @@ export function useStudyTimer() {
     });
   }, []);
 
-  const progress = 1 - state.timeLeft / DURATIONS[state.mode];
+  const setCustomDurations = useCallback((newDurations: CustomDurations) => {
+    setState((prev) => ({
+      ...prev,
+      customDurations: newDurations,
+      timeLeft: prev.isRunning ? prev.timeLeft : newDurations[prev.mode] * 60,
+    }));
+  }, []);
+
+  const progress = 1 - state.timeLeft / (state.customDurations[state.mode] * 60);
+
+  // Computed analytics
+  const bestDayRecord = state.dailyRecords.reduce<DailyRecord | null>(
+    (best, day) => (!best || day.totalSeconds > best.totalSeconds ? day : best),
+    null
+  );
+
+  const last7Days = (() => {
+    const days: DailyRecord[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const existing = state.dailyRecords.find((r) => r.date === dateStr);
+      days.push(existing ?? { date: dateStr, totalSeconds: 0, sessions: 0 });
+    }
+    return days;
+  })();
+
+  const avgDailyTime = state.dailyRecords.length > 0
+    ? state.dailyRecords.reduce((sum, d) => sum + d.totalSeconds, 0) / state.dailyRecords.length
+    : 0;
 
   return {
     ...state,
@@ -213,6 +287,9 @@ export function useStudyTimer() {
     setCurrentSubject,
     addSubject,
     removeSubject,
-    durations: DURATIONS,
+    setCustomDurations,
+    bestDayRecord,
+    last7Days,
+    avgDailyTime,
   };
 }
