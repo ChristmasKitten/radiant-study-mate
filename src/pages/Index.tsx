@@ -212,7 +212,7 @@ const Index = () => {
         </div>
       )}
 
-
+      {view === "tasks" && (
         <div className="flex w-full flex-col items-center gap-4">
           <SubjectSelector
             subjects={timer.subjects}
