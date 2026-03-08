@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type CatMood = "happy" | "focused" | "sleepy" | "idle";
@@ -9,7 +9,7 @@ interface StudyCatProps {
   onHide: () => void;
   isRunning?: boolean;
   mode?: "focus" | "shortBreak" | "longBreak";
-  totalFocusTime?: number; // seconds studied today
+  totalFocusTime?: number;
 }
 
 interface CatState {
@@ -29,20 +29,20 @@ function getMood(isRunning: boolean, mode: string, totalFocusTime: number): CatM
   return "idle";
 }
 
-function getMoodEmoji(mood: CatMood, action: CatAction, frame: number): string {
+function getMoodEmoji(mood: CatMood, action: CatAction): string {
   if (action === "petted") return "😻";
   if (action === "sleeping") return "😴";
-
   switch (mood) {
-    case "happy": return action === "sitting" ? "😸" : ["🐈", "🐈‍⬛"][frame];
-    case "focused": return action === "sitting" ? "🐱" : ["🐈", "🐈‍⬛"][frame];
-    case "sleepy": return action === "sitting" ? "😺" : "🐈";
-    case "idle": return action === "sitting" ? "🐱" : ["🐈", "🐈‍⬛"][frame];
+    case "happy": return action === "sitting" ? "😸" : "🐱";
+    case "focused": return action === "sitting" ? "🐱" : "🐱";
+    case "sleepy": return action === "sitting" ? "😺" : "😺";
+    case "idle": return action === "sitting" ? "🐱" : "🐱";
   }
 }
 
 function getMoodBubble(mood: CatMood, action: CatAction): string | null {
   if (action === "petted" || action === "sleeping") return null;
+  if (action === "walking") return null;
   switch (mood) {
     case "happy": return "⭐";
     case "focused": return "📖";
@@ -51,55 +51,56 @@ function getMoodBubble(mood: CatMood, action: CatAction): string | null {
   }
 }
 
-export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
+export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
   const [cat, setCat] = useState<CatState>({
     x: 100,
     direction: "right",
     action: "walking",
   });
-  const [frame, setFrame] = useState(0);
   const [hearts, setHearts] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const actionTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const catRef = useRef(cat);
+  catRef.current = cat;
 
   const mood = getMood(isRunning, mode, totalFocusTime);
+  const speed = mood === "sleepy" ? 0.8 : mood === "happy" ? 2.0 : 1.4;
 
-  // Speed varies by mood
-  const speed = mood === "sleepy" ? 0.8 : mood === "happy" ? 2.2 : 1.5;
-
-  // Walking animation frame
-  useEffect(() => {
-    if (cat.action !== "walking") return;
-    const interval = setInterval(() => setFrame((f) => (f + 1) % 2), mood === "sleepy" ? 500 : 300);
-    return () => clearInterval(interval);
-  }, [cat.action, mood]);
-
-  // Movement loop
+  // Movement loop using requestAnimationFrame for smooth motion
   useEffect(() => {
     if (!visible) return;
-    const move = () => {
-      setCat((prev) => {
-        if (prev.action !== "walking") return prev;
-        const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
-        let newX = prev.x + (prev.direction === "right" ? speed : -speed);
-        let newDir = prev.direction;
-        if (newX > maxX) { newX = maxX; newDir = "left"; }
-        if (newX < 10) { newX = 10; newDir = "right"; }
-        return { ...prev, x: newX, direction: newDir };
-      });
+    let animId: number;
+    let lastTime = 0;
+
+    const move = (time: number) => {
+      if (lastTime === 0) lastTime = time;
+      const delta = time - lastTime;
+
+      if (delta > 30) {
+        lastTime = time;
+        setCat((prev) => {
+          if (prev.action !== "walking") return prev;
+          const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
+          let newX = prev.x + (prev.direction === "right" ? speed : -speed);
+          let newDir = prev.direction;
+          if (newX > maxX) { newX = maxX; newDir = "left"; }
+          if (newX < 10) { newX = 10; newDir = "right"; }
+          if (newX === prev.x && newDir === prev.direction) return prev;
+          return { ...prev, x: newX, direction: newDir };
+        });
+      }
+      animId = requestAnimationFrame(move);
     };
-    const interval = setInterval(move, 30);
-    return () => clearInterval(interval);
+
+    animId = requestAnimationFrame(move);
+    return () => cancelAnimationFrame(animId);
   }, [visible, speed]);
 
-  // Random sit/sleep - sleepy mood rests more often
+  // Random sit/sleep
   useEffect(() => {
     if (!visible) return;
     const scheduleAction = () => {
-      const delay = mood === "sleepy"
-        ? 4000 + Math.random() * 6000
-        : 8000 + Math.random() * 15000;
-
+      const delay = mood === "sleepy" ? 4000 + Math.random() * 6000 : 8000 + Math.random() * 15000;
       actionTimerRef.current = setTimeout(() => {
         setCat((prev) => {
           if (prev.action === "petted") return prev;
@@ -109,10 +110,7 @@ export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", t
           return { ...prev, action };
         });
 
-        const restTime = mood === "sleepy"
-          ? 5000 + Math.random() * 8000
-          : 3000 + Math.random() * 5000;
-
+        const restTime = mood === "sleepy" ? 5000 + Math.random() * 8000 : 3000 + Math.random() * 5000;
         setTimeout(() => {
           setCat((prev) => {
             if (prev.action === "petted") return prev;
@@ -124,9 +122,7 @@ export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", t
     };
 
     scheduleAction();
-    return () => {
-      if (actionTimerRef.current) clearTimeout(actionTimerRef.current);
-    };
+    return () => { if (actionTimerRef.current) clearTimeout(actionTimerRef.current); };
   }, [visible, mood]);
 
   const handlePet = useCallback(() => {
@@ -140,18 +136,17 @@ export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", t
 
   if (!visible) return null;
 
-  const catEmoji = getMoodEmoji(mood, cat.action, frame);
+  const catEmoji = getMoodEmoji(mood, cat.action);
   const bubble = getMoodBubble(mood, cat.action);
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed bottom-0 left-0 right-0 h-12 pointer-events-none z-50"
-    >
-      <motion.div
+    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-12 pointer-events-none z-50">
+      <div
         className="absolute bottom-1 pointer-events-auto cursor-pointer select-none"
-        animate={{ x: cat.x }}
-        transition={{ type: "tween", duration: 0.03 }}
+        style={{
+          transform: `translateX(${cat.x}px)`,
+          transition: "transform 0.05s linear",
+        }}
         onClick={handlePet}
         title="Pet me! 🐱"
       >
@@ -163,21 +158,14 @@ export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", t
             {catEmoji}
           </span>
 
-          {/* Mood bubble */}
-          {bubble && cat.action !== "sleeping" && (
-            <span className="absolute -top-4 -right-2 text-[10px] animate-pulse">
-              {bubble}
-            </span>
+          {bubble && (
+            <span className="absolute -top-4 -right-2 text-[10px] animate-pulse">{bubble}</span>
           )}
 
-          {/* Zzz for sleeping */}
           {cat.action === "sleeping" && (
-            <span className="absolute -top-4 -right-2 text-[10px] text-muted-foreground animate-pulse">
-              💤
-            </span>
+            <span className="absolute -top-4 -right-2 text-[10px] text-muted-foreground animate-pulse">💤</span>
           )}
 
-          {/* Hearts when petted */}
           <AnimatePresence>
             {hearts && (
               <motion.span
@@ -192,14 +180,7 @@ export function StudyCat({ visible, onHide, isRunning = false, mode = "focus", t
             )}
           </AnimatePresence>
         </div>
-      </motion.div>
-
-      <button
-        onClick={onHide}
-        className="pointer-events-auto absolute bottom-1 right-2 text-[9px] text-muted-foreground/40 hover:text-muted-foreground"
-      >
-        hide cat
-      </button>
+      </div>
     </div>
   );
-}
+});

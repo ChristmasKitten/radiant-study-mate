@@ -1,4 +1,4 @@
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TimerControlsProps {
@@ -6,9 +6,10 @@ interface TimerControlsProps {
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
+  onFocusMode?: () => void;
 }
 
-export function TimerControls({ isRunning, onStart, onPause, onReset }: TimerControlsProps) {
+export function TimerControls({ isRunning, onStart, onPause, onReset, onFocusMode }: TimerControlsProps) {
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -28,7 +29,19 @@ export function TimerControls({ isRunning, onStart, onPause, onReset }: TimerCon
         {isRunning ? <Pause className="h-7 w-7" /> : <Play className="ml-1 h-7 w-7" />}
       </Button>
 
-      <div className="h-12 w-12" />
+      {onFocusMode ? (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onFocusMode}
+          className="h-12 w-12 rounded-full border-muted-foreground/20 bg-secondary hover:bg-secondary/80"
+          title="Focus mode"
+        >
+          <Maximize2 className="h-5 w-5 text-muted-foreground" />
+        </Button>
+      ) : (
+        <div className="h-12 w-12" />
+      )}
     </div>
   );
 }

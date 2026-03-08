@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, BarChart3, ListTodo, FileText, Maximize2 } from "lucide-react";
+import { BookOpen, BarChart3, ListTodo, FileText, CalendarDays } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
@@ -22,9 +22,11 @@ import { GamificationBar } from "@/components/GamificationBar";
 import { ExamCountdown } from "@/components/ExamCountdown";
 import { WeeklyReport } from "@/components/WeeklyReport";
 import { StudyCat } from "@/components/StudyCat";
+import { AmbientMusic } from "@/components/AmbientMusic";
+import { StudySchedule } from "@/components/StudySchedule";
 import { Button } from "@/components/ui/button";
 
-type View = "timer" | "analytics" | "tasks" | "report";
+type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
 const Index = () => {
   const timer = useStudyTimer();
@@ -154,6 +156,15 @@ const Index = () => {
             >
               <FileText className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setView((v) => (v === "schedule" ? "timer" : "schedule"))}
+              className={`h-9 w-9 rounded-full ${view === "schedule" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <CalendarDays className="h-4 w-4" />
+            </Button>
+            <AmbientMusic />
             <SettingsPanel
               durations={timer.customDurations}
               onDurationsChange={timer.setCustomDurations}
@@ -192,6 +203,12 @@ const Index = () => {
             xp={gamification.xp}
             getSubjectColor={gamification.getSubjectColor}
           />
+        </div>
+      )}
+
+      {view === "schedule" && (
+        <div className="flex w-full flex-col items-center">
+          <StudySchedule />
         </div>
       )}
 
@@ -255,23 +272,13 @@ const Index = () => {
                 isRunning={timer.isRunning}
               />
 
-              <div className="flex items-center gap-3">
-                <TimerControls
-                  isRunning={timer.isRunning}
-                  onStart={handleStart}
-                  onPause={timer.pause}
-                  onReset={timer.reset}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setFocusMode(true)}
-                  className="h-10 w-10 rounded-full text-muted-foreground hover:text-primary"
-                  title="Enter focus mode"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <TimerControls
+                isRunning={timer.isRunning}
+                onStart={handleStart}
+                onPause={timer.pause}
+                onReset={timer.reset}
+                onFocusMode={() => setFocusMode(true)}
+              />
 
               <SessionStats
                 sessionsCompleted={timer.sessionsCompleted}
