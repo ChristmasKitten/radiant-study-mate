@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, BookOpen, Trash2, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface SubjectSelectorProps {
   subjects: string[];
@@ -48,16 +43,15 @@ export function SubjectSelector({
   const [colorTarget, setColorTarget] = useState<string | null>(null);
 
   const handleAdd = () => {
-    if (newSubject.trim()) {
-      onAdd(newSubject.trim());
-      setNewSubject("");
-      setIsAdding(false);
-    }
+    if (!newSubject.trim() || disabled) return;
+    onAdd(newSubject.trim());
+    setNewSubject("");
+    setIsAdding(false);
   };
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3 w-full max-w-md">
+      <div className="flex w-full max-w-md flex-col items-center gap-2.5">
         <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
           <BookOpen className="h-3 w-3" />
           <span>Studying</span>
@@ -67,34 +61,34 @@ export function SubjectSelector({
           {subjects.map((subject) => {
             const color = getSubjectColor?.(subject);
             const isActive = currentSubject === subject;
+
             return (
-              <motion.button
+              <button
                 key={subject}
-                layout
                 onClick={() => !disabled && onSelect(subject)}
-                className={`group relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+                className={`group relative flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium ${
                   isActive
-                    ? "text-primary-foreground shadow-md"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                } ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-                style={isActive && color ? { backgroundColor: color, boxShadow: `0 4px 14px ${color}33` } : undefined}
-                whileTap={disabled ? {} : { scale: 0.95 }}
+                    ? "border-transparent text-primary-foreground"
+                    : "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                style={isActive && color ? { backgroundColor: color } : undefined}
+                type="button"
               >
-                {color && !isActive && (
-                  <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                )}
+                {color && !isActive && <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />}
                 {subject}
+
                 {!disabled && subjects.length > 1 && (
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeleteTarget(subject);
                     }}
-                    className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground group-hover:flex cursor-pointer"
+                    className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground group-hover:flex"
                   >
                     <X className="h-2.5 w-2.5" />
                   </span>
                 )}
+
                 {!disabled && onColorChange && (
                   <Popover open={colorTarget === subject} onOpenChange={(open) => setColorTarget(open ? subject : null)}>
                     <PopoverTrigger asChild>
@@ -103,12 +97,13 @@ export function SubjectSelector({
                           e.stopPropagation();
                           setColorTarget(subject);
                         }}
-                        className="absolute -left-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-card border border-border text-[10px] text-muted-foreground group-hover:flex cursor-pointer"
+                        className="absolute -left-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted-foreground group-hover:flex"
                       >
                         <Palette className="h-2.5 w-2.5" />
                       </span>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2" side="top">
+
+                    <PopoverContent className="w-auto border-border bg-card p-2" side="top">
                       <div className="grid grid-cols-7 gap-1">
                         {(palette ?? []).map((c) => (
                           <button
@@ -118,74 +113,64 @@ export function SubjectSelector({
                               onColorChange(subject, c);
                               setColorTarget(null);
                             }}
-                            className={`h-5 w-5 rounded-full border-2 transition-transform hover:scale-125 ${
+                            className={`h-5 w-5 rounded-full border-2 ${
                               getSubjectColor?.(subject) === c ? "border-foreground" : "border-transparent"
                             }`}
                             style={{ backgroundColor: c }}
+                            type="button"
                           />
                         ))}
                       </div>
                     </PopoverContent>
                   </Popover>
                 )}
-              </motion.button>
+              </button>
             );
           })}
 
-          <AnimatePresence>
-            {isAdding ? (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="flex items-center gap-1"
-              >
-                <Input
-                  value={newSubject}
-                  onChange={(e) => setNewSubject(e.target.value.slice(0, 30))}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAdd();
-                    if (e.key === "Escape") setIsAdding(false);
-                  }}
-                  placeholder="Subject name"
-                  className="h-8 w-32 rounded-full bg-secondary border-border text-sm"
-                  autoFocus
-                  disabled={disabled}
-                />
-                <Button
-                  size="sm"
-                  onClick={handleAdd}
-                  className="h-8 rounded-full px-3 text-xs"
-                  disabled={!newSubject.trim() || disabled}
-                >
-                  Add
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={() => !disabled && setIsAdding(true)}
-                className={`flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-muted-foreground/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary ${
-                  disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
-                }`}
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {isAdding ? (
+            <div className="flex items-center gap-1">
+              <Input
+                value={newSubject}
+                onChange={(e) => setNewSubject(e.target.value.slice(0, 30))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAdd();
+                  if (e.key === "Escape") setIsAdding(false);
+                }}
+                placeholder="Subject"
+                className="h-8 w-28 rounded-full border-border bg-secondary text-sm"
+                autoFocus
+                disabled={disabled}
+              />
+              <Button size="sm" onClick={handleAdd} className="h-8 rounded-full px-3 text-xs" disabled={!newSubject.trim() || disabled}>
+                Add
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={() => !disabled && setIsAdding(true)}
+              className={`flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary ${
+                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+              }`}
+              type="button"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
+
+        {disabled && <p className="text-[10px] text-muted-foreground">Subject is locked while timer is running.</p>}
       </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <AlertDialogContent className="bg-card border-border sm:max-w-sm">
+        <AlertDialogContent className="border-border bg-card sm:max-w-sm">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-foreground">
               <Trash2 className="h-4 w-4 text-destructive" />
               Delete Subject
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteTarget}"</span>? This won't remove your study history for this subject.
+              Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteTarget}"</span>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
