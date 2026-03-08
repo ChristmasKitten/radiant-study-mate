@@ -74,10 +74,6 @@ export function SubjectSelector({
                 style={isActive && color ? { backgroundColor: color } : undefined}
                 type="button"
               >
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: color ?? "hsl(var(--muted-foreground) / 0.35)" }}
-                />
                 <span className="truncate">{subject}</span>
 
                 {!disabled && subjects.length > 1 && (
