@@ -61,6 +61,7 @@ export function SubjectSelector({
           {subjects.map((subject) => {
             const color = getSubjectColor?.(subject);
             const isActive = currentSubject === subject;
+            const isColorOpen = colorTarget === subject;
 
             return (
               <div key={subject} className="group relative">
@@ -87,17 +88,30 @@ export function SubjectSelector({
                 )}
 
                 {!disabled && onColorChange && (
-                  <Popover open={colorTarget === subject} onOpenChange={(open) => setColorTarget(open ? subject : null)}>
+                  <Popover
+                    open={isColorOpen}
+                    onOpenChange={(open) => setColorTarget(open ? subject : null)}
+                  >
                     <PopoverTrigger asChild>
-                      <span
-                        onClick={() => setColorTarget(subject)}
-                        className="absolute -left-1 -top-1 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-muted-foreground group-hover:flex"
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setColorTarget(isColorOpen ? null : subject);
+                        }}
+                        className={`absolute -left-1 -top-1 h-4 w-4 items-center justify-center rounded-full border border-border bg-card text-muted-foreground ${
+                          isColorOpen ? "flex" : "hidden group-hover:flex"
+                        }`}
                       >
                         <Palette className="h-2.5 w-2.5" />
-                      </span>
+                      </button>
                     </PopoverTrigger>
 
-                    <PopoverContent className="w-auto border-border bg-card p-2" side="top">
+                    <PopoverContent
+                      className="w-auto border-border bg-card p-2 pointer-events-auto"
+                      side="top"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
                       <div className="grid grid-cols-7 gap-1">
                         {(palette ?? []).map((c) => (
                           <button

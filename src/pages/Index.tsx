@@ -145,6 +145,7 @@ const Index = () => {
             avgDailyTime={timer.avgDailyTime}
             allTimeTotalSeconds={timer.allTimeTotalSeconds}
             subjectTimes={timer.subjectTimes}
+            subjects={timer.subjects}
           />
         </div>
       )}

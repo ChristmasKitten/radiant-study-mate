@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, TrendingUp, Calendar, BarChart3 } from "lucide-react";
+import { Trophy, TrendingUp, Calendar, BarChart3, BookOpen } from "lucide-react";
 import { DailyRecord, SubjectTime } from "@/hooks/useStudyTimer";
 import { StudyGraph } from "@/components/StudyGraph";
 import { StudyCalendar } from "@/components/StudyCalendar";
@@ -12,6 +13,7 @@ interface AnalyticsPanelProps {
   avgDailyTime: number;
   allTimeTotalSeconds: number;
   subjectTimes: SubjectTime[];
+  subjects: string[];
 }
 
 function formatTime(seconds: number) {
@@ -33,11 +35,51 @@ export function AnalyticsPanel({
   avgDailyTime,
   allTimeTotalSeconds,
   subjectTimes,
+  subjects,
 }: AnalyticsPanelProps) {
+  const [selectedSubject, setSelectedSubject] = useState<string>("__all__");
   const maxSeconds = Math.max(...last7Days.map((d) => d.totalSeconds), 1);
+
+  const isAll = selectedSubject === "__all__";
+  const viewSubjectTime = isAll
+    ? {
+        totalSeconds: subjectTimes.reduce((s, t) => s + t.totalSeconds, 0),
+        sessions: subjectTimes.reduce((s, t) => s + t.sessions, 0),
+      }
+    : subjectTimes.find((s) => s.subject === selectedSubject) ?? { totalSeconds: 0, sessions: 0 };
+
+  const options = ["__all__", ...subjects];
 
   return (
     <div className="w-full max-w-md space-y-4">
+      {/* Subject filter */}
+      <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-primary" />
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            className="bg-transparent text-sm font-medium text-primary outline-none cursor-pointer"
+          >
+            {options.map((opt) => (
+              <option key={opt} value={opt} className="bg-card text-foreground">
+                {opt === "__all__" ? "All Subjects" : opt}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="text-right">
+            <p className="font-mono text-sm font-bold text-foreground">{formatTime(viewSubjectTime.totalSeconds)}</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Focused</p>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-sm font-bold text-foreground">{viewSubjectTime.sessions}</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Sessions</p>
+          </div>
+        </div>
+      </div>
+
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2">
         <div className="flex flex-col items-center gap-1 rounded-xl bg-card border border-border p-3">
