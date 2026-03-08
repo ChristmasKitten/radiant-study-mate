@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, BarChart3 } from "lucide-react";
+import { BookOpen, BarChart3, ListTodo } from "lucide-react";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
+import { useTaskList } from "@/hooks/useTaskList";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";
@@ -11,12 +12,18 @@ import { SubjectSelector } from "@/components/SubjectSelector";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { TaskList } from "@/components/TaskList";
 import { Button } from "@/components/ui/button";
+
+type View = "timer" | "analytics" | "tasks";
 
 const Index = () => {
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme } = useThemeToggle();
-  const [showAnalytics, setShowAnalytics] = useState(false);
+  const taskList = useTaskList();
+  const [view, setView] = useState<View>("timer");
+
+  const pendingForCurrent = taskList.pendingCount(timer.currentSubject);
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
@@ -43,8 +50,21 @@ const Index = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setShowAnalytics((p) => !p)}
-            className={`h-9 w-9 rounded-full ${showAnalytics ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setView((v) => (v === "tasks" ? "timer" : "tasks"))}
+            className={`relative h-9 w-9 rounded-full ${view === "tasks" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <ListTodo className="h-4 w-4" />
+            {pendingForCurrent > 0 && view !== "tasks" && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                {pendingForCurrent}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setView((v) => (v === "analytics" ? "timer" : "analytics"))}
+            className={`h-9 w-9 rounded-full ${view === "analytics" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
           >
             <BarChart3 className="h-4 w-4" />
           </Button>
@@ -58,7 +78,7 @@ const Index = () => {
       </div>
 
       <AnimatePresence mode="wait">
-        {showAnalytics ? (
+        {view === "analytics" ? (
           <motion.div
             key="analytics"
             initial={{ opacity: 0, y: 20 }}
@@ -73,6 +93,31 @@ const Index = () => {
               avgDailyTime={timer.avgDailyTime}
               allTimeTotalSeconds={timer.allTimeTotalSeconds}
               subjectTimes={timer.subjectTimes}
+            />
+          </motion.div>
+        ) : view === "tasks" ? (
+          <motion.div
+            key="tasks"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full flex flex-col items-center gap-4"
+          >
+            {/* Subject selector for tasks */}
+            <SubjectSelector
+              subjects={timer.subjects}
+              currentSubject={timer.currentSubject}
+              onSelect={timer.setCurrentSubject}
+              onAdd={timer.addSubject}
+              onRemove={timer.removeSubject}
+              disabled={false}
+            />
+            <TaskList
+              subject={timer.currentSubject}
+              tasks={taskList.getTasksForSubject(timer.currentSubject)}
+              onAdd={taskList.addTask}
+              onToggle={taskList.toggleTask}
+              onRemove={taskList.removeTask}
             />
           </motion.div>
         ) : (
@@ -126,6 +171,8 @@ const Index = () => {
               totalFocusTime={timer.totalFocusTime}
               allTimeTotalSeconds={timer.allTimeTotalSeconds}
               bestDaySeconds={timer.bestDayRecord?.totalSeconds ?? 0}
+              currentSubject={timer.currentSubject}
+              subjectTimes={timer.subjectTimes}
             />
 
             <p className="mt-6 text-xs text-muted-foreground/50">
