@@ -82,13 +82,7 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
 
       {/* Center content */}
       <div className="absolute flex flex-col items-center">
-        <span
-          className={`font-mono text-6xl font-bold tracking-wider ${colorClass}`}
-          style={{
-            textShadow: isRunning ? `0 0 20px hsl(${glowColor} / 0.3)` : "none",
-            transition: "text-shadow 0.5s ease",
-          }}
-        >
+        <span className={`font-mono text-6xl font-bold tracking-wider ${colorClass}`}>
           {formatted}
         </span>
         <span className="mt-1.5 text-xs uppercase tracking-[0.3em] text-muted-foreground">

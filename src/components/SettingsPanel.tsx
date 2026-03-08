@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings, Cat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { CustomDurations } from "@/hooks/useStudyTimer";
 import { ColorTheme, COLOR_THEMES } from "@/hooks/useThemeToggle";
 import {
@@ -18,9 +19,11 @@ interface SettingsPanelProps {
   colorTheme: ColorTheme;
   onColorChange: (c: ColorTheme) => void;
   disabled?: boolean;
+  catVisible: boolean;
+  onCatToggle: (v: boolean) => void;
 }
 
-export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled }: SettingsPanelProps) {
+export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle }: SettingsPanelProps) {
   const [open, setOpen] = useState(false);
   const [local, setLocal] = useState(durations);
 
@@ -110,6 +113,15 @@ export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColo
               min={5} max={60} step={5}
             />
           </div>
+        </div>
+
+        {/* Cat toggle */}
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-2">
+            <Cat className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Study Cat</span>
+          </div>
+          <Switch checked={catVisible} onCheckedChange={onCatToggle} />
         </div>
 
         <Button onClick={handleSave} className="w-full mt-1 rounded-lg" size="sm">

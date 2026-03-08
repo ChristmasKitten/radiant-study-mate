@@ -34,6 +34,7 @@ const Index = () => {
   const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
   const [focusMode, setFocusMode] = useState(false);
+  const [catVisible, setCatVisible] = useState(true);
 
   useReminders({ isRunning: timer.isRunning });
 
@@ -95,7 +96,7 @@ const Index = () => {
             {timer.currentSubject} • Click outside to exit
           </p>
         </div>
-        <StudyCat />
+        <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} />
       </div>
     );
   }
@@ -159,6 +160,8 @@ const Index = () => {
               colorTheme={colorTheme}
               onColorChange={setColor}
               disabled={false}
+              catVisible={catVisible}
+              onCatToggle={setCatVisible}
             />
             <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           </div>
@@ -294,7 +297,7 @@ const Index = () => {
         </div>
       )}
 
-      <StudyCat />
+      <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} />
     </div>
   );
 };
