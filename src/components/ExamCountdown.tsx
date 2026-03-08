@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarClock, Plus, X, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { CalendarClock, Plus, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Exam, daysUntil } from "@/hooks/useExamCountdown";
