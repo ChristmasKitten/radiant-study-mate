@@ -57,8 +57,12 @@ function randomTarget(maxX: number): number {
 
 export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
   const { equippedItems } = useGamification();
+  const equippedHatId = equippedItems["cat_hat"];
   const equippedAccessoryId = equippedItems["cat_accessory"];
+  const equippedSkinId = equippedItems["cat_skin"];
+  const equippedHat = SHOP_ITEMS.find((i) => i.id === equippedHatId)?.emoji;
   const equippedAccessory = SHOP_ITEMS.find((i) => i.id === equippedAccessoryId)?.emoji;
+  const equippedSkin = SHOP_ITEMS.find((i) => i.id === equippedSkinId)?.emoji;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [cat, setCat] = useState<CatState>(() => ({
@@ -162,11 +166,11 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
 
   if (!visible) return null;
 
-  const catEmoji = getMoodEmoji(mood, cat.action);
+  const catEmoji = equippedSkin || getMoodEmoji(mood, cat.action);
   const bubble = getMoodBubble(mood, cat.action);
 
   return (
-    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-12 pointer-events-none z-50">
+    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-14 pointer-events-none z-50">
       <div
         className="absolute bottom-1 pointer-events-auto cursor-pointer select-none"
         style={{
@@ -181,9 +185,14 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
             className="text-2xl inline-block"
             style={{ transform: cat.direction === "left" ? "scaleX(-1)" : "scaleX(1)" }}
           >
-            {catEmoji}
+             {catEmoji}
+            {equippedHat && (
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-base drop-shadow-sm z-10">
+                {equippedHat}
+              </span>
+            )}
             {equippedAccessory && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg drop-shadow-sm z-10">
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs drop-shadow-sm z-10">
                 {equippedAccessory}
               </span>
             )}
