@@ -21,19 +21,28 @@ interface SettingsPanelProps {
   disabled?: boolean;
   catVisible: boolean;
   onCatToggle: (v: boolean) => void;
+  dailyGoal: number;
+  onDailyGoalChange: (g: number) => void;
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
 }
 
-export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle }: SettingsPanelProps) {
-  const [open, setOpen] = useState(false);
+export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange }: SettingsPanelProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [local, setLocal] = useState(durations);
+  const [localGoal, setLocalGoal] = useState(dailyGoal);
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   const handleSave = () => {
     onDurationsChange(local);
+    onDailyGoalChange(localGoal);
     setOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) setLocal(durations); }}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) { setLocal(durations); setLocalGoal(dailyGoal); } }}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
@@ -113,6 +122,20 @@ export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColo
               min={5} max={60} step={5}
             />
           </div>
+        </div>
+
+        {/* Daily Goal */}
+        <div className="pt-1">
+          <label className="text-xs text-muted-foreground block mb-2">Daily Goal</label>
+          <div className="flex justify-between mb-2">
+            <span className="text-xs text-muted-foreground">Focus Time</span>
+            <span className="font-mono text-xs text-primary font-bold">{localGoal} min</span>
+          </div>
+          <Slider
+            value={[localGoal]}
+            onValueChange={([v]) => setLocalGoal(v)}
+            min={10} max={600} step={10}
+          />
         </div>
 
         {/* Cat toggle */}
