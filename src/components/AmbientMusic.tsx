@@ -83,12 +83,17 @@ export function AmbientMusic() {
   const noiseGainRef = useRef<GainNode | null>(null);
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
-  // Convert Spotify URL to embed URL
-  const getSpotifyEmbedUrl = (url: string): string | null => {
+  // Convert Spotify/Apple Music URL to embed URL
+  const getMusicEmbedUrl = (url: string): string | null => {
     try {
-      // Match open.spotify.com/playlist/ID, /track/ID, /album/ID, /episode/ID
-      const match = url.match(/open\.spotify\.com\/(playlist|track|album|episode)\/([a-zA-Z0-9]+)/);
-      if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+      // Spotify
+      const spotifyMatch = url.match(/open\.spotify\.com\/(playlist|track|album|episode)\/([a-zA-Z0-9]+)/);
+      if (spotifyMatch) return `https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}?utm_source=generator&theme=0`;
+      
+      // Apple Music
+      if (url.includes("music.apple.com")) {
+        return url.trim().replace("music.apple.com", "embed.music.apple.com");
+      }
       return null;
     } catch {
       return null;
@@ -102,7 +107,7 @@ export function AmbientMusic() {
       localStorage.removeItem("studyflow_spotify");
       return;
     }
-    if (getSpotifyEmbedUrl(trimmed)) {
+    if (getMusicEmbedUrl(trimmed)) {
       setSpotifyUrl(trimmed);
       localStorage.setItem("studyflow_spotify", trimmed);
       setSpotifyInput("");
@@ -252,14 +257,14 @@ export function AmbientMusic() {
               ))}
             </div>
 
-            {/* Spotify embed */}
+            {/* Music embed */}
             <div className="mb-4">
               <button
                 onClick={() => setShowSpotify((v) => !v)}
                 className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground mb-2"
               >
                 <Link className="h-3 w-3" />
-                <span>Spotify Playlist</span>
+                <span>Music Playlist</span>
               </button>
 
               {showSpotify && (
@@ -271,13 +276,13 @@ export function AmbientMusic() {
                         value={spotifyInput}
                         onChange={(e) => setSpotifyInput(e.target.value.slice(0, 200))}
                         onKeyDown={(e) => e.key === "Enter" && handleSpotifySave()}
-                        placeholder="Paste Spotify URL…"
+                        placeholder="Paste Spotify or Apple Music URL…"
                         className="flex-1 rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                       <Button
                         size="sm"
                         onClick={handleSpotifySave}
-                        disabled={!spotifyInput.trim() || !getSpotifyEmbedUrl(spotifyInput.trim())}
+                        disabled={!spotifyInput.trim() || !getMusicEmbedUrl(spotifyInput.trim())}
                         className="h-7 rounded-lg px-2.5 text-[10px]"
                       >
                         Add
@@ -286,7 +291,7 @@ export function AmbientMusic() {
                   ) : (
                     <div className="space-y-1.5">
                       <iframe
-                        src={getSpotifyEmbedUrl(spotifyUrl) ?? ""}
+                        src={getMusicEmbedUrl(spotifyUrl) ?? ""}
                         width="100%"
                         height="152"
                         frameBorder="0"
