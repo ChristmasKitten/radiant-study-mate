@@ -41,6 +41,8 @@ const Index = () => {
   const [focusMode, setFocusMode] = useState(false);
   const [catVisible, setCatVisible] = useState(false);
   const [showRating, setShowRating] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
 
   useReminders({ isRunning: timer.isRunning });
 
@@ -142,8 +144,11 @@ const Index = () => {
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <BookOpen className="h-4 w-4 text-primary" />
               </div>
-              <h1 className="truncate text-xl font-bold tracking-tight text-foreground">
-                Pomi<span className="text-primary">dor</span>
+              <h1 
+                className="truncate text-xl font-bold tracking-tight text-foreground cursor-pointer select-none"
+                onClick={() => setLogoClicks(c => c + 1)}
+              >
+                {logoClicks >= 10 ? "🍅" : <>Pomi<span className="text-primary">dor</span></>}
               </h1>
             </div>
 
@@ -171,6 +176,10 @@ const Index = () => {
                 disabled={false}
                 catVisible={catVisible}
                 onCatToggle={setCatVisible}
+                dailyGoal={timer.dailyGoal}
+                onDailyGoalChange={timer.setDailyGoal}
+                open={isSettingsOpen}
+                onOpenChange={setIsSettingsOpen}
               />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
             </div>
@@ -305,6 +314,7 @@ const Index = () => {
                 subjectTimes={timer.subjectTimes}
                 currentStreak={gamification.currentStreak}
                 dailyGoal={timer.dailyGoal}
+                onTodayClick={() => setIsSettingsOpen(true)}
               />
 
               <ExamCountdown
