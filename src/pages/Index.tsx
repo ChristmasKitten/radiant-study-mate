@@ -142,14 +142,14 @@ const Index = () => {
         <header className="mb-6 flex w-full max-w-md flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 overflow-hidden cursor-pointer" onClick={() => setView("timer")}>
                 <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
               </div>
               <h1 
-                className="truncate text-xl font-bold tracking-tight text-foreground cursor-pointer select-none"
-                onClick={() => setLogoClicks(c => c + 1)}
+                className="truncate text-xl font-bold tracking-tight text-foreground select-none"
+                onClick={() => setLogoClicks(c => c >= 20 ? 0 : c + 1)}
               >
-                {logoClicks >= 10 ? "🍅" : <>Pomi<span className="text-primary">dor</span></>}
+                {logoClicks >= 10 && logoClicks < 20 ? "🍅" : <>Pomi<span className="text-primary">dor</span></>}
               </h1>
             </div>
 
