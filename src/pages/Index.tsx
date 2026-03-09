@@ -217,14 +217,23 @@ const Index = () => {
                 progress={timer.progress}
                 mode={timer.mode}
                 isRunning={timer.isRunning}
+                studyStyle={timer.studyStyle}
               />
-              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Move mouse or press a key to return
               </p>
             </div>
           ) : (
             <div className="flex w-full flex-col items-center gap-4">
-              <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
+              <StudyStyleSelector
+                currentStyle={timer.studyStyle}
+                onStyleChange={timer.setStudyStyle}
+              />
+
+              <ModeSelector
+                currentMode={timer.mode}
+                onModeChange={timer.setMode}
+                disableBreakModes={timer.studyStyle === "freeStudy"}
+              />
 
               <SubjectSelector
                 subjects={timer.subjects}
