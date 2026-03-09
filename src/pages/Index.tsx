@@ -52,6 +52,12 @@ const Index = () => {
   const prevLevelRef = useRef(gamification.level);
 
   useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
     const handler = () => {
       fireSessionComplete();
       
@@ -65,8 +71,22 @@ const Index = () => {
         prevLevelRef.current = gamification.level;
       }, 100);
     };
+
+    const breakCompleteHandler = () => {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Break's over!", {
+          body: "Time to start your next focus session.",
+        });
+      }
+      toast({ title: "Break's over!", description: "Time to start your next focus session." });
+    };
+
     window.addEventListener("studyflow:session-complete", handler);
-    return () => window.removeEventListener("studyflow:session-complete", handler);
+    window.addEventListener("studyflow:break-complete", breakCompleteHandler);
+    return () => {
+      window.removeEventListener("studyflow:session-complete", handler);
+      window.removeEventListener("studyflow:break-complete", breakCompleteHandler);
+    };
   }, [gamification]);
 
   const handleStart = () => {
@@ -90,6 +110,7 @@ const Index = () => {
             isRunning={timer.isRunning}
             studyStyle={timer.studyStyle}
             currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
+            lastFocusScore={timer.lastFocusScore}
           />
 
           <TimerControls
@@ -220,6 +241,7 @@ const Index = () => {
                 isRunning={timer.isRunning}
                 studyStyle={timer.studyStyle}
                 currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
+                lastFocusScore={timer.lastFocusScore}
               />
               <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Move mouse or press a key to return
@@ -258,6 +280,7 @@ const Index = () => {
                 isRunning={timer.isRunning}
                 studyStyle={timer.studyStyle}
                 currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
+                lastFocusScore={timer.lastFocusScore}
               />
 
               <TimerControls

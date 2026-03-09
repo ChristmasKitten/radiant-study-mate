@@ -47,6 +47,8 @@ interface TimerState {
   customDurations: CustomDurations;
   todayDate: string;
   studyStyle: StudyStyle;
+  pausesCount: number;
+  lastFocusScore: number | null;
 }
 
 const DEFAULT_DURATIONS: CustomDurations = {
@@ -123,6 +125,8 @@ export function useStudyTimer() {
     customDurations: durations,
     todayDate: today,
     studyStyle,
+    pausesCount: 0,
+    lastFocusScore: null,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -216,6 +220,8 @@ export function useStudyTimer() {
             // Notify listeners (for celebrations)
             if (wasFocus) {
               window.dispatchEvent(new CustomEvent("studyflow:session-complete"));
+            } else {
+              window.dispatchEvent(new CustomEvent("studyflow:break-complete"));
             }
 
             return {
@@ -228,6 +234,8 @@ export function useStudyTimer() {
               allTimeTotalSeconds: newAllTime,
               subjectTimes: newSubjectTimes,
               dailyRecords: newDailyRecords,
+              pausesCount: 0,
+              lastFocusScore: wasFocus ? Math.max(40, 100 - prev.pausesCount * 5) : prev.lastFocusScore,
             };
           }
 
@@ -246,7 +254,11 @@ export function useStudyTimer() {
   }, []);
 
   const pause = useCallback(() => {
-    setState((prev) => ({ ...prev, isRunning: false }));
+    setState((prev) => ({ 
+      ...prev, 
+      isRunning: false,
+      pausesCount: prev.mode === "focus" && prev.isRunning ? prev.pausesCount + 1 : prev.pausesCount
+    }));
   }, []);
 
   const reset = useCallback(() => {
@@ -376,5 +388,6 @@ export function useStudyTimer() {
     last7Days,
     avgDailyTime,
     currentFocusDurationMinutes,
+    lastFocusScore: state.lastFocusScore,
   };
 }

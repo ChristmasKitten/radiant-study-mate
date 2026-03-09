@@ -8,6 +8,7 @@ interface CircularTimerProps {
   isRunning: boolean;
   studyStyle?: StudyStyle;
   currentFocusDurationMinutes?: number;
+  lastFocusScore?: number | null;
 }
 
 function getEndTime(secondsLeft: number): string {
@@ -15,7 +16,7 @@ function getEndTime(secondsLeft: number): string {
   return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic", currentFocusDurationMinutes }: CircularTimerProps) {
+export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic", currentFocusDurationMinutes, lastFocusScore }: CircularTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
@@ -82,6 +83,11 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle 
         {studyStyle === "progressive" && mode === "focus" && currentFocusDurationMinutes && (
           <Badge variant="secondary" className="mt-3 text-[10px] font-medium">
             Target: {currentFocusDurationMinutes} min
+          </Badge>
+        )}
+        {mode !== "focus" && lastFocusScore !== undefined && lastFocusScore !== null && (
+          <Badge variant="secondary" className="mt-3 text-[10px] font-medium text-primary bg-primary/10">
+            Focus Score: {lastFocusScore}%
           </Badge>
         )}
       </div>
