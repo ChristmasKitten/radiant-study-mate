@@ -166,11 +166,11 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
 
   if (!visible) return null;
 
-  const catEmoji = getMoodEmoji(mood, cat.action);
+  const catEmoji = equippedSkin || getMoodEmoji(mood, cat.action);
   const bubble = getMoodBubble(mood, cat.action);
 
   return (
-    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-12 pointer-events-none z-50">
+    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-14 pointer-events-none z-50">
       <div
         className="absolute bottom-1 pointer-events-auto cursor-pointer select-none"
         style={{
