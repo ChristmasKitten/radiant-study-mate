@@ -33,6 +33,7 @@ import logoUrl from "@/assets/logo.png";
 type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
 const Index = () => {
+  // Forced update to unstick the deployment process
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
   const taskList = useTaskList();
