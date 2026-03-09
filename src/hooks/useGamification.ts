@@ -58,14 +58,7 @@ export const ALL_BADGES: Badge[] = [
 ];
 
 function loadData(): GamificationData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return { totalSessions: 0, unlockedBadges: [], ...parsed };
-    }
-  } catch {}
-  return {
+  const defaultData = {
     xp: 0,
     level: 1,
     currentStreak: 0,
@@ -77,6 +70,15 @@ function loadData(): GamificationData {
     unlockedItems: [],
     equippedItems: {},
   };
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...defaultData, ...parsed };
+    }
+  } catch {}
+  return defaultData;
 }
 
 function saveData(data: GamificationData) {
