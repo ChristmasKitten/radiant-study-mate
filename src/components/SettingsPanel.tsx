@@ -21,19 +21,28 @@ interface SettingsPanelProps {
   disabled?: boolean;
   catVisible: boolean;
   onCatToggle: (v: boolean) => void;
+  dailyGoal: number;
+  onDailyGoalChange: (g: number) => void;
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
 }
 
-export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle }: SettingsPanelProps) {
-  const [open, setOpen] = useState(false);
+export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange }: SettingsPanelProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [local, setLocal] = useState(durations);
+  const [localGoal, setLocalGoal] = useState(dailyGoal);
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   const handleSave = () => {
     onDurationsChange(local);
+    onDailyGoalChange(localGoal);
     setOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) setLocal(durations); }}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) { setLocal(durations); setLocalGoal(dailyGoal); } }}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
