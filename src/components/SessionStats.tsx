@@ -13,6 +13,7 @@ interface SessionStatsProps {
   subjectTimes: SubjectTime[];
   currentStreak: number;
   dailyGoal: number;
+  onTodayClick?: () => void;
 }
 
 function formatTime(seconds: number) {
@@ -31,6 +32,7 @@ export function SessionStats({
   subjectTimes,
   currentStreak,
   dailyGoal,
+  onTodayClick,
 }: SessionStatsProps) {
   const subjectTime = subjectTimes.find((s) => s.subject === currentSubject) ?? { totalSeconds: 0, sessions: 0 };
 
@@ -63,7 +65,10 @@ export function SessionStats({
           ].map((stat) => (
             <Tooltip key={stat.label}>
               <TooltipTrigger asChild>
-                <div className="flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-card p-2 cursor-help hover:bg-accent/5 transition-colors">
+                <div 
+                  className={`flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-card p-2 hover:bg-accent/5 transition-colors ${stat.label === "Today" ? "cursor-pointer" : "cursor-help"}`}
+                  onClick={stat.label === "Today" ? onTodayClick : undefined}
+                >
                   <stat.icon className={`h-3 w-3 ${stat.color}`} />
                   <span className="text-center font-mono text-xs font-bold leading-none text-foreground">{stat.value}</span>
                   <span className="text-center text-[8px] uppercase tracking-widest leading-none text-muted-foreground">{stat.label}</span>

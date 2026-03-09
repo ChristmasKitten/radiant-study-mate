@@ -124,6 +124,20 @@ export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColo
           </div>
         </div>
 
+        {/* Daily Goal */}
+        <div className="pt-1">
+          <label className="text-xs text-muted-foreground block mb-2">Daily Goal</label>
+          <div className="flex justify-between mb-2">
+            <span className="text-xs text-muted-foreground">Focus Time</span>
+            <span className="font-mono text-xs text-primary font-bold">{localGoal} min</span>
+          </div>
+          <Slider
+            value={[localGoal]}
+            onValueChange={([v]) => setLocalGoal(v)}
+            min={10} max={600} step={10}
+          />
+        </div>
+
         {/* Cat toggle */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
