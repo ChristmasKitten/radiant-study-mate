@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Clock, Calendar, Repeat } from "lucide-react";
+import { Plus, X, Clock, Calendar, Repeat, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -27,7 +27,11 @@ function saveSchedule(blocks: ScheduleBlock[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(blocks));
 }
 
-export function StudySchedule() {
+interface StudyScheduleProps {
+  onStartSession?: (subject: string, durationMinutes: number) => void;
+}
+
+export function StudySchedule({ onStartSession }: StudyScheduleProps) {
   const [blocks, setBlocks] = useState<ScheduleBlock[]>(loadSchedule);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({
@@ -68,6 +72,12 @@ export function StudySchedule() {
     saveSchedule(updated);
   };
 
+  const getDurationMinutes = (start: string, end: string): number => {
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
+    return (eh * 60 + em) - (sh * 60 + sm);
+  };
+
   const today = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
 
   return (
@@ -96,7 +106,6 @@ export function StudySchedule() {
             className="h-8 text-sm rounded-lg"
           />
 
-          {/* Day multi-select */}
           <div>
             <p className="text-[10px] text-muted-foreground mb-1.5">Days</p>
             <div className="flex gap-1">
@@ -176,22 +185,34 @@ export function StudySchedule() {
                 <p className="text-[10px] text-muted-foreground">No sessions planned</p>
               ) : (
                 <div className="space-y-1.5">
-                  {dayBlocks.map((block) => (
-                    <div key={block.id} className="group flex items-center gap-2">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {block.startTime}–{block.endTime}
-                      </span>
-                      <span className="text-xs font-medium text-foreground">{block.subject}</span>
-                      {block.repeating && <Repeat className="h-2.5 w-2.5 text-muted-foreground/50" />}
-                      <button
-                        onClick={() => handleRemove(block.id)}
-                        className="ml-auto hidden h-4 w-4 items-center justify-center rounded-full text-destructive group-hover:flex"
-                      >
-                        <X className="h-2.5 w-2.5" />
-                      </button>
-                    </div>
-                  ))}
+                  {dayBlocks.map((block) => {
+                    const duration = getDurationMinutes(block.startTime, block.endTime);
+                    return (
+                      <div key={block.id} className="group flex items-center gap-2">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                          {block.startTime}–{block.endTime}
+                        </span>
+                        <span className="text-xs font-medium text-foreground">{block.subject}</span>
+                        {block.repeating && <Repeat className="h-2.5 w-2.5 text-muted-foreground/50" />}
+                        {isToday && onStartSession && (
+                          <button
+                            onClick={() => onStartSession(block.subject, duration > 0 ? duration : 25)}
+                            className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                            title="Start this session"
+                          >
+                            <Play className="h-2.5 w-2.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleRemove(block.id)}
+                          className={`${isToday && onStartSession ? "" : "ml-auto "}hidden h-4 w-4 items-center justify-center rounded-full text-destructive group-hover:flex`}
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
