@@ -3,6 +3,7 @@ import { TimerMode } from "@/hooks/useStudyTimer";
 interface ModeSelectorProps {
   currentMode: TimerMode;
   onModeChange: (mode: TimerMode) => void;
+  disableBreakModes?: boolean;
 }
 
 const modes: { key: TimerMode; label: string }[] = [
@@ -11,10 +12,12 @@ const modes: { key: TimerMode; label: string }[] = [
   { key: "longBreak", label: "Long Break" },
 ];
 
-export function ModeSelector({ currentMode, onModeChange }: ModeSelectorProps) {
+export function ModeSelector({ currentMode, onModeChange, disableBreakModes = false }: ModeSelectorProps) {
+  const visibleModes = disableBreakModes ? modes.filter((mode) => mode.key === "focus") : modes;
+
   return (
     <div className="relative flex rounded-full bg-secondary p-1">
-      {modes.map((mode) => (
+      {visibleModes.map((mode) => (
         <button
           key={mode.key}
           onClick={() => onModeChange(mode.key)}

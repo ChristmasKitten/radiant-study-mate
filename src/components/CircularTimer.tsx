@@ -1,10 +1,11 @@
-import { TimerMode } from "@/hooks/useStudyTimer";
+import { StudyStyle, TimerMode } from "@/hooks/useStudyTimer";
 
 interface CircularTimerProps {
   timeLeft: number;
   progress: number;
   mode: TimerMode;
   isRunning: boolean;
+  studyStyle?: StudyStyle;
 }
 
 function getEndTime(secondsLeft: number): string {
@@ -12,7 +13,7 @@ function getEndTime(secondsLeft: number): string {
   return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularTimerProps) {
+export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic" }: CircularTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
@@ -27,10 +28,21 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
   const colorClass = isFocus ? "text-primary" : mode === "shortBreak" ? "text-timer-warn" : "text-accent";
   const strokeColor = isFocus ? "hsl(var(--primary))" : mode === "shortBreak" ? "hsl(var(--timer-warn))" : "hsl(var(--accent))";
 
+  const modeLabel = studyStyle === "freeStudy"
+    ? "Free Study"
+    : mode === "focus"
+      ? "Focus"
+      : mode === "shortBreak"
+        ? "Short Break"
+        : "Long Break";
+
+  const statusLabel = studyStyle === "freeStudy"
+    ? (isRunning ? "tracking elapsed time" : "ready to track")
+    : (isRunning ? `ends at ${getEndTime(timeLeft)}` : "paused");
+
   return (
     <div className="relative flex items-center justify-center">
       <svg width={size} height={size} className="relative transform -rotate-90">
-        {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -41,7 +53,6 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
           opacity={0.5}
         />
 
-        {/* Progress arc */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -56,18 +67,18 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning }: CircularT
         />
       </svg>
 
-      {/* Timer text overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-6xl font-bold tracking-tight ${colorClass}`}>
           {formatted}
         </span>
-        <span className="text-sm text-muted-foreground mt-2 capitalize">
-          {mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break"}
+        <span className="mt-2 text-sm text-muted-foreground">
+          {modeLabel}
         </span>
-        <span className="text-xs text-muted-foreground mt-1">
-          {isRunning ? `ends at ${getEndTime(timeLeft)}` : "paused"}
+        <span className="mt-1 text-xs text-muted-foreground">
+          {statusLabel}
         </span>
       </div>
     </div>
   );
 }
+

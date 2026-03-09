@@ -24,6 +24,7 @@ import { WeeklyReport } from "@/components/WeeklyReport";
 import { StudyCat } from "@/components/StudyCat";
 import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
+import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 
 import { Button } from "@/components/ui/button";
 
@@ -87,6 +88,7 @@ const Index = () => {
             progress={timer.progress}
             mode={timer.mode}
             isRunning={timer.isRunning}
+            studyStyle={timer.studyStyle}
           />
 
           <TimerControls
@@ -215,6 +217,7 @@ const Index = () => {
                 progress={timer.progress}
                 mode={timer.mode}
                 isRunning={timer.isRunning}
+                studyStyle={timer.studyStyle}
               />
               <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Move mouse or press a key to return
@@ -222,7 +225,16 @@ const Index = () => {
             </div>
           ) : (
             <div className="flex w-full flex-col items-center gap-4">
-              <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} />
+              <StudyStyleSelector
+                currentStyle={timer.studyStyle}
+                onStyleChange={timer.setStudyStyle}
+              />
+
+              <ModeSelector
+                currentMode={timer.mode}
+                onModeChange={timer.setMode}
+                disableBreakModes={timer.studyStyle === "freeStudy"}
+              />
 
               <SubjectSelector
                 subjects={timer.subjects}
@@ -242,6 +254,7 @@ const Index = () => {
                 progress={timer.progress}
                 mode={timer.mode}
                 isRunning={timer.isRunning}
+                studyStyle={timer.studyStyle}
               />
 
               <TimerControls
