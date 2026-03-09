@@ -25,6 +25,7 @@ export function SessionStats({
   sessionsCompleted,
   totalFocusTime,
   allTimeTotalSeconds,
+  bestDaySeconds,
   currentSubject,
   subjectTimes,
   currentStreak,
