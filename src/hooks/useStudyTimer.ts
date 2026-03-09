@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 export type TimerMode = "focus" | "shortBreak" | "longBreak";
+export type StudyStyle = "classic" | "progressive" | "freeStudy";
 
 export interface SubjectTime {
   subject: string;
@@ -29,6 +30,7 @@ interface PersistedData {
   dailyRecords: DailyRecord[];
   customDurations: CustomDurations;
   todayDate: string;
+  studyStyle: StudyStyle;
 }
 
 interface TimerState {
@@ -44,6 +46,7 @@ interface TimerState {
   dailyRecords: DailyRecord[];
   customDurations: CustomDurations;
   todayDate: string;
+  studyStyle: StudyStyle;
 }
 
 const DEFAULT_DURATIONS: CustomDurations = {
@@ -52,6 +55,9 @@ const DEFAULT_DURATIONS: CustomDurations = {
   longBreak: 15,
 };
 
+const DEFAULT_STUDY_STYLE: StudyStyle = "classic";
+const PROGRESSIVE_STEP_MINUTES = 5;
+const PROGRESSIVE_MAX_MINUTES = 60;
 const STORAGE_KEY = "studyflow_data";
 
 function getToday(): string {
@@ -74,6 +80,24 @@ function savePersistedData(data: PersistedData) {
 
 const DEFAULT_SUBJECTS = ["Math", "Science", "English", "History"];
 
+function getFocusDurationMinutes(studyStyle: StudyStyle, durations: CustomDurations, sessionsCompleted: number) {
+  if (studyStyle !== "progressive") return durations.focus;
+  return Math.min(durations.focus + sessionsCompleted * PROGRESSIVE_STEP_MINUTES, PROGRESSIVE_MAX_MINUTES);
+}
+
+function getModeDurationSeconds(
+  mode: TimerMode,
+  studyStyle: StudyStyle,
+  durations: CustomDurations,
+  sessionsCompleted: number,
+) {
+  if (mode === "focus") {
+    if (studyStyle === "freeStudy") return 0;
+    return getFocusDurationMinutes(studyStyle, durations, sessionsCompleted) * 60;
+  }
+  return durations[mode] * 60;
+}
+
 export function useStudyTimer() {
   const persisted = loadPersistedData();
   const today = getToday();
@@ -82,12 +106,14 @@ export function useStudyTimer() {
   const isNewDay = persisted.todayDate !== today;
 
   const durations = persisted.customDurations ?? DEFAULT_DURATIONS;
+  const sessionsCompleted = isNewDay ? 0 : (persisted.sessionsCompleted ?? 0);
+  const studyStyle = persisted.studyStyle ?? DEFAULT_STUDY_STYLE;
 
   const [state, setState] = useState<TimerState>({
     mode: "focus",
-    timeLeft: durations.focus * 60,
+    timeLeft: getModeDurationSeconds("focus", studyStyle, durations, sessionsCompleted),
     isRunning: false,
-    sessionsCompleted: isNewDay ? 0 : (persisted.sessionsCompleted ?? 0),
+    sessionsCompleted,
     totalFocusTime: isNewDay ? 0 : (persisted.totalFocusTime ?? 0),
     currentSubject: persisted.subjects?.[0] ?? DEFAULT_SUBJECTS[0],
     subjects: persisted.subjects?.length ? persisted.subjects : DEFAULT_SUBJECTS,
@@ -96,6 +122,7 @@ export function useStudyTimer() {
     dailyRecords: persisted.dailyRecords ?? [],
     customDurations: durations,
     todayDate: today,
+    studyStyle,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -111,12 +138,9 @@ export function useStudyTimer() {
       dailyRecords: state.dailyRecords,
       customDurations: state.customDurations,
       todayDate: state.todayDate,
+      studyStyle: state.studyStyle,
     });
-  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds, state.dailyRecords, state.customDurations, state.todayDate]);
-
-  const getDurationSeconds = useCallback((mode: TimerMode, dur: CustomDurations) => {
-    return dur[mode] * 60;
-  }, []);
+  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds, state.dailyRecords, state.customDurations, state.todayDate, state.studyStyle]);
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -126,13 +150,19 @@ export function useStudyTimer() {
   }, []);
 
   useEffect(() => {
-    if (state.isRunning && state.timeLeft > 0) {
+    if (state.isRunning) {
       intervalRef.current = setInterval(() => {
         setState((prev) => {
+          if (prev.studyStyle === "freeStudy") {
+            return { ...prev, timeLeft: prev.timeLeft + 1 };
+          }
+
           if (prev.timeLeft <= 1) {
             const wasFocus = prev.mode === "focus";
             const newSessions = wasFocus ? prev.sessionsCompleted + 1 : prev.sessionsCompleted;
-            const sessionDuration = wasFocus ? prev.customDurations.focus * 60 : 0;
+            const sessionDuration = wasFocus
+              ? getModeDurationSeconds("focus", prev.studyStyle, prev.customDurations, prev.sessionsCompleted)
+              : 0;
             const newTotal = prev.totalFocusTime + sessionDuration;
             const newAllTime = prev.allTimeTotalSeconds + sessionDuration;
             const nextMode: TimerMode = wasFocus
@@ -191,7 +221,7 @@ export function useStudyTimer() {
             return {
               ...prev,
               mode: nextMode,
-              timeLeft: prev.customDurations[nextMode] * 60,
+              timeLeft: getModeDurationSeconds(nextMode, prev.studyStyle, prev.customDurations, newSessions),
               isRunning: false,
               sessionsCompleted: newSessions,
               totalFocusTime: newTotal,
@@ -200,12 +230,14 @@ export function useStudyTimer() {
               dailyRecords: newDailyRecords,
             };
           }
+
           return { ...prev, timeLeft: prev.timeLeft - 1 };
         });
       }, 1000);
     } else {
       clearTimer();
     }
+
     return clearTimer;
   }, [state.isRunning, clearTimer]);
 
@@ -218,11 +250,40 @@ export function useStudyTimer() {
   }, []);
 
   const reset = useCallback(() => {
-    setState((prev) => ({ ...prev, timeLeft: prev.customDurations[prev.mode] * 60, isRunning: false }));
+    setState((prev) => {
+      const nextMode: TimerMode = prev.studyStyle === "freeStudy" ? "focus" : prev.mode;
+      return {
+        ...prev,
+        mode: nextMode,
+        timeLeft: getModeDurationSeconds(nextMode, prev.studyStyle, prev.customDurations, prev.sessionsCompleted),
+        isRunning: false,
+      };
+    });
   }, []);
 
   const setMode = useCallback((mode: TimerMode) => {
-    setState((prev) => ({ ...prev, mode, timeLeft: prev.customDurations[mode] * 60, isRunning: false }));
+    setState((prev) => {
+      if (prev.studyStyle === "freeStudy" && mode !== "focus") return prev;
+      return {
+        ...prev,
+        mode,
+        timeLeft: getModeDurationSeconds(mode, prev.studyStyle, prev.customDurations, prev.sessionsCompleted),
+        isRunning: false,
+      };
+    });
+  }, []);
+
+  const setStudyStyle = useCallback((studyStyleValue: StudyStyle) => {
+    setState((prev) => {
+      const nextMode: TimerMode = studyStyleValue === "freeStudy" ? "focus" : prev.mode;
+      return {
+        ...prev,
+        studyStyle: studyStyleValue,
+        mode: nextMode,
+        timeLeft: getModeDurationSeconds(nextMode, studyStyleValue, prev.customDurations, prev.sessionsCompleted),
+        isRunning: false,
+      };
+    });
   }, []);
 
   const setCurrentSubject = useCallback((subject: string) => {
@@ -254,16 +315,33 @@ export function useStudyTimer() {
     setState((prev) => ({
       ...prev,
       customDurations: newDurations,
-      timeLeft: prev.isRunning ? prev.timeLeft : newDurations[prev.mode] * 60,
+      timeLeft: prev.isRunning
+        ? prev.timeLeft
+        : getModeDurationSeconds(prev.mode, prev.studyStyle, newDurations, prev.sessionsCompleted),
     }));
   }, []);
 
-  const progress = 1 - state.timeLeft / (state.customDurations[state.mode] * 60);
+  const modeDurationSeconds = getModeDurationSeconds(
+    state.mode,
+    state.studyStyle,
+    state.customDurations,
+    state.sessionsCompleted,
+  );
+
+  const progress = state.studyStyle === "freeStudy"
+    ? (state.timeLeft % 3600) / 3600
+    : 1 - state.timeLeft / Math.max(modeDurationSeconds, 1);
+
+  const currentFocusDurationMinutes = getFocusDurationMinutes(
+    state.studyStyle,
+    state.customDurations,
+    state.sessionsCompleted,
+  );
 
   // Computed analytics
   const bestDayRecord = state.dailyRecords.reduce<DailyRecord | null>(
     (best, day) => (!best || day.totalSeconds > best.totalSeconds ? day : best),
-    null
+    null,
   );
 
   const last7Days = (() => {
@@ -289,6 +367,7 @@ export function useStudyTimer() {
     pause,
     reset,
     setMode,
+    setStudyStyle,
     setCurrentSubject,
     addSubject,
     removeSubject,
@@ -296,5 +375,6 @@ export function useStudyTimer() {
     bestDayRecord,
     last7Days,
     avgDailyTime,
+    currentFocusDurationMinutes,
   };
 }
