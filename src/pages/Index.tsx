@@ -25,6 +25,7 @@ import { StudyCat } from "@/components/StudyCat";
 import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
 import { StudyStyleSelector } from "@/components/StudyStyleSelector";
+import { CosmeticsShop } from "@/components/CosmeticsShop";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -172,6 +173,7 @@ const Index = () => {
                 newBadges={gamification.newBadges}
                 onClearNewBadges={gamification.clearNewBadges}
               />
+              <CosmeticsShop />
               <AmbientMusic />
               <SettingsPanel
                 durations={timer.customDurations}
