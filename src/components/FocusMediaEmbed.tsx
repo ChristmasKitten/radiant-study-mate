@@ -3,11 +3,12 @@ import { Music2, Youtube, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-type Platform = "youtube" | "spotify";
+type Platform = "youtube" | "spotify" | "apple_music";
 
 const DEFAULT_EMBEDS: Record<Platform, string> = {
   youtube: "https://www.youtube.com/embed/jfKfPfyJRdk",
   spotify: "https://open.spotify.com/embed/playlist/37i9dQZF1DX8Uebhn9wzrS",
+  apple_music: "https://embed.music.apple.com/us/playlist/lo-fi-chill/pl.u-V9D7v8GUB0v21xM",
 };
 
 function getYouTubeEmbedUrl(raw: string): string | null {
@@ -52,6 +53,18 @@ function getSpotifyEmbedUrl(raw: string): string | null {
   }
 }
 
+function getAppleMusicEmbedUrl(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    if (!url.hostname.includes("music.apple.com")) return null;
+    
+    // Replace "music.apple.com" with "embed.music.apple.com"
+    return raw.trim().replace("music.apple.com", "embed.music.apple.com");
+  } catch {
+    return null;
+  }
+}
+
 export function FocusMediaEmbed() {
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [urlInput, setUrlInput] = useState("");
@@ -61,10 +74,13 @@ export function FocusMediaEmbed() {
   const activeEmbed = embedUrls[platform];
 
   const handleLoad = () => {
-    const next = platform === "youtube" ? getYouTubeEmbedUrl(urlInput) : getSpotifyEmbedUrl(urlInput);
+    let next: string | null = null;
+    if (platform === "youtube") next = getYouTubeEmbedUrl(urlInput);
+    else if (platform === "spotify") next = getSpotifyEmbedUrl(urlInput);
+    else if (platform === "apple_music") next = getAppleMusicEmbedUrl(urlInput);
 
     if (!next) {
-      setError(platform === "youtube" ? "Use a valid YouTube link." : "Use a valid Spotify track/playlist/album link.");
+      setError(`Use a valid ${platform === "youtube" ? "YouTube" : platform === "spotify" ? "Spotify" : "Apple Music"} link.`);
       return;
     }
 
@@ -80,32 +96,45 @@ export function FocusMediaEmbed() {
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Focus Player</p>
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-2">
+      <div className="mb-3 grid grid-cols-3 gap-2">
         <Button
           type="button"
           variant={platform === "youtube" ? "default" : "secondary"}
           size="sm"
-          className="rounded-lg"
+          className="rounded-lg text-xs px-2"
           onClick={() => {
             setPlatform("youtube");
             setError(null);
           }}
         >
-          <Youtube className="mr-1.5 h-3.5 w-3.5" />
+          <Youtube className="mr-1 h-3.5 w-3.5" />
           YouTube
         </Button>
         <Button
           type="button"
           variant={platform === "spotify" ? "default" : "secondary"}
           size="sm"
-          className="rounded-lg"
+          className="rounded-lg text-xs px-2"
           onClick={() => {
             setPlatform("spotify");
             setError(null);
           }}
         >
-          <Music2 className="mr-1.5 h-3.5 w-3.5" />
+          <Music2 className="mr-1 h-3.5 w-3.5" />
           Spotify
+        </Button>
+        <Button
+          type="button"
+          variant={platform === "apple_music" ? "default" : "secondary"}
+          size="sm"
+          className="rounded-lg text-xs px-2"
+          onClick={() => {
+            setPlatform("apple_music");
+            setError(null);
+          }}
+        >
+          <Music2 className="mr-1 h-3.5 w-3.5" />
+          Apple
         </Button>
       </div>
 

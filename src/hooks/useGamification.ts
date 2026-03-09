@@ -19,6 +19,8 @@ export interface GamificationData {
   subjectColors: Record<string, string>;
   totalSessions: number;
   unlockedBadges: string[];
+  unlockedItems: string[];
+  equippedItems: Record<string, string>;
 }
 
 const XP_PER_SESSION = 50;
@@ -72,6 +74,8 @@ function loadData(): GamificationData {
     subjectColors: { ...DEFAULT_SUBJECT_COLORS },
     totalSessions: 0,
     unlockedBadges: [],
+    unlockedItems: [],
+    equippedItems: {},
   };
 }
 
@@ -185,6 +189,31 @@ export function useGamification() {
     }));
   }, []);
 
+  const unlockItem = useCallback((itemId: string, cost: number) => {
+    setData((prev) => {
+      if (prev.xp >= cost && !prev.unlockedItems.includes(itemId)) {
+        return {
+          ...prev,
+          xp: prev.xp - cost,
+          unlockedItems: [...prev.unlockedItems, itemId],
+        };
+      }
+      return prev;
+    });
+  }, []);
+
+  const equipItem = useCallback((category: string, itemId: string | null) => {
+    setData((prev) => {
+      const newEquipped = { ...prev.equippedItems };
+      if (itemId === null) {
+        delete newEquipped[category];
+      } else {
+        newEquipped[category] = itemId;
+      }
+      return { ...prev, equippedItems: newEquipped };
+    });
+  }, []);
+
   return {
     ...data,
     xpInCurrentLevel,
@@ -193,6 +222,8 @@ export function useGamification() {
     awardSessionXP,
     getSubjectColor,
     setSubjectColor,
+    unlockItem,
+    equipItem,
     palette: PALETTE,
     unlockedBadges,
     lockedBadges,

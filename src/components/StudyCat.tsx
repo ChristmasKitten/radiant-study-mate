@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGamification } from "@/hooks/useGamification";
+import { SHOP_ITEMS } from "@/components/CosmeticsShop";
 
 type CatMood = "happy" | "focused" | "sleepy" | "idle";
 type CatAction = "walking" | "sitting" | "sleeping" | "petted";
@@ -54,6 +56,10 @@ function randomTarget(maxX: number): number {
 }
 
 export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
+  const { equippedItems } = useGamification();
+  const equippedAccessoryId = equippedItems["cat_accessory"];
+  const equippedAccessory = SHOP_ITEMS.find((i) => i.id === equippedAccessoryId)?.emoji;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [cat, setCat] = useState<CatState>(() => ({
     x: 100,
@@ -176,6 +182,11 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
             style={{ transform: cat.direction === "left" ? "scaleX(-1)" : "scaleX(1)" }}
           >
             {catEmoji}
+            {equippedAccessory && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg drop-shadow-sm z-10">
+                {equippedAccessory}
+              </span>
+            )}
           </span>
 
           {bubble && (
