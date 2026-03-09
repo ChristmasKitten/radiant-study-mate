@@ -108,6 +108,19 @@ const Index = () => {
     timer.start();
   };
 
+  const handleScheduleStart = useCallback((subject: string, durationMinutes: number) => {
+    // Add subject if not exists, select it, set custom focus duration, switch to timer view, start
+    if (!timer.subjects.includes(subject)) {
+      timer.addSubject(subject);
+    }
+    timer.setCurrentSubject(subject);
+    timer.setCustomDurations({ ...timer.customDurations, focus: durationMinutes });
+    timer.setMode("focus");
+    setView("timer");
+    toast({ title: "⏱️ Session started!", description: `${subject} — ${durationMinutes} min focus` });
+    setTimeout(() => timer.start(), 200);
+  }, [timer]);
+
   // Fullscreen focus mode
   if (focusMode) {
     return (
@@ -178,6 +191,7 @@ const Index = () => {
                 onClearNewBadges={gamification.clearNewBadges}
               />
               <CosmeticsShop />
+              <CsvExportImport />
               <AmbientMusic />
               <SettingsPanel
                 durations={timer.customDurations}
@@ -249,7 +263,7 @@ const Index = () => {
 
       {view === "schedule" && (
         <div className="flex w-full flex-col items-center">
-          <StudySchedule />
+          <StudySchedule onStartSession={handleScheduleStart} />
         </div>
       )}
 
@@ -346,7 +360,11 @@ const Index = () => {
         </div>
       )}
 
-      <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} />
+      <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} onCatClick={() => setShowSkiGame(true)} />
+      
+      <AnimatePresence>
+        {showSkiGame && <SkiingCatGame onClose={() => setShowSkiGame(false)} />}
+      </AnimatePresence>
       
       <Dialog open={showRating} onOpenChange={setShowRating}>
         <DialogContent className="sm:max-w-md">
