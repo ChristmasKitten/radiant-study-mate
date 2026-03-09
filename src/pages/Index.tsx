@@ -27,6 +27,7 @@ import { StudySchedule } from "@/components/StudySchedule";
 import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
@@ -39,6 +40,7 @@ const Index = () => {
   const [view, setView] = useState<View>("timer");
   const [focusMode, setFocusMode] = useState(false);
   const [catVisible, setCatVisible] = useState(false);
+  const [showRating, setShowRating] = useState(false);
 
   useReminders({ isRunning: timer.isRunning });
 
@@ -70,6 +72,8 @@ const Index = () => {
         }
         prevLevelRef.current = gamification.level;
       }, 100);
+
+      setShowRating(true);
     };
 
     const breakCompleteHandler = () => {
@@ -300,6 +304,7 @@ const Index = () => {
                 subjects={timer.subjects}
                 subjectTimes={timer.subjectTimes}
                 currentStreak={gamification.currentStreak}
+                dailyGoal={timer.dailyGoal}
               />
 
               <ExamCountdown
@@ -321,6 +326,34 @@ const Index = () => {
       )}
 
       <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} />
+      
+      <Dialog open={showRating} onOpenChange={setShowRating}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Session Complete!</DialogTitle>
+            <DialogDescription>How was your focus during this session?</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3 py-4">
+            <Button variant="outline" className="flex flex-col items-center justify-center gap-2 h-24 hover:bg-destructive/10 hover:text-destructive border-border" onClick={() => setShowRating(false)}>
+              <span className="text-3xl leading-none">😫</span>
+              <span className="text-xs font-medium">Distracted</span>
+            </Button>
+            <Button variant="outline" className="flex flex-col items-center justify-center gap-2 h-24 hover:bg-primary/10 hover:text-primary border-border" onClick={() => setShowRating(false)}>
+              <span className="text-3xl leading-none">🙂</span>
+              <span className="text-xs font-medium">Good</span>
+            </Button>
+            <Button variant="outline" className="flex flex-col items-center justify-center gap-2 h-24 border-primary text-primary hover:bg-primary/10 shadow-sm" onClick={() => {
+              setShowRating(false);
+              timer.setMode("focus");
+              setTimeout(() => timer.start(), 100);
+            }}>
+              <span className="text-3xl leading-none">🔥</span>
+              <span className="text-xs font-bold">Flow</span>
+            </Button>
+          </div>
+          <p className="text-center text-[10px] text-muted-foreground mt-1">Selecting "Flow" skips your break and starts a new focus session immediately.</p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

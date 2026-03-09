@@ -12,6 +12,7 @@ interface SessionStatsProps {
   subjects: string[];
   subjectTimes: SubjectTime[];
   currentStreak: number;
+  dailyGoal: number;
 }
 
 function formatTime(seconds: number) {
@@ -29,6 +30,7 @@ export function SessionStats({
   currentSubject,
   subjectTimes,
   currentStreak,
+  dailyGoal,
 }: SessionStatsProps) {
   const subjectTime = subjectTimes.find((s) => s.subject === currentSubject) ?? { totalSeconds: 0, sessions: 0 };
 
@@ -55,7 +57,7 @@ export function SessionStats({
         <div className="grid grid-cols-4 gap-1.5">
           {[
             { icon: Flame, label: "Streak", value: currentStreak > 0 ? `${currentStreak}d` : "—", color: "text-destructive", tooltip: "Active daily streak" },
-            { icon: Clock, label: "Today", value: formatTime(totalFocusTime), color: "text-timer-warn", tooltip: bestDaySeconds > 0 ? `Best day: ${formatTime(bestDaySeconds)}` : "Focus time today" },
+            { icon: Clock, label: "Today", value: `${Math.floor(totalFocusTime / 60)}m / ${dailyGoal}m`, color: "text-timer-warn", tooltip: bestDaySeconds > 0 ? `Best day: ${formatTime(bestDaySeconds)}` : "Focus time today" },
             { icon: Timer, label: "All Time", value: formatTime(allTimeTotalSeconds), color: "text-primary", tooltip: "Total focus time" },
             { icon: Target, label: "Sessions", value: sessionsCompleted, color: "text-primary", tooltip: "Sessions completed today" },
           ].map((stat) => (
