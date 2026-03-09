@@ -367,7 +367,7 @@ const Index = () => {
       </Dialog>
       
       {!hideChrome && (
-        <footer className="mt-auto py-6 text-center text-xs text-muted-foreground/60 w-full max-w-md">
+        <footer className="mt-auto pt-10 pb-4 text-center text-xs text-muted-foreground/60 w-full max-w-md">
           <p>Cultivating focus, one session at a time.</p>
           <p className="mt-1">Pomidor &copy; {new Date().getFullYear()}</p>
         </footer>
