@@ -1,3 +1,4 @@
+// @ts-ignore
 import confetti from "canvas-confetti";
 
 export function fireSessionComplete() {
