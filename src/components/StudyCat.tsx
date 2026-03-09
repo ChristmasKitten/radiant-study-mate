@@ -12,6 +12,7 @@ interface StudyCatProps {
   isRunning?: boolean;
   mode?: "focus" | "shortBreak" | "longBreak";
   totalFocusTime?: number;
+  onCatClick?: () => void;
 }
 
 interface CatState {
@@ -55,7 +56,7 @@ function randomTarget(maxX: number): number {
   return 20 + Math.random() * Math.max(maxX - 40, 100);
 }
 
-export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
+export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0, onCatClick }: StudyCatProps) {
   const { equippedItems } = useGamification();
   const equippedHatId = equippedItems["cat_hat"];
   const equippedAccessoryId = equippedItems["cat_accessory"];
@@ -164,6 +165,14 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     }, 2000);
   }, []);
 
+  const handleCatClick = useCallback(() => {
+    if (onCatClick) {
+      onCatClick();
+    } else {
+      handlePet();
+    }
+  }, [onCatClick, handlePet]);
+
   if (!visible) return null;
 
   const catEmoji = equippedSkin || getMoodEmoji(mood, cat.action);
@@ -177,7 +186,7 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
           transform: `translateX(${cat.x}px)`,
           transition: "transform 0.05s linear",
         }}
-        onClick={handlePet}
+        onClick={handleCatClick}
         title="Pet me! 🐱"
       >
         <div className="relative">
