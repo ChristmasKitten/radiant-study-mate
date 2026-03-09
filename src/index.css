@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 230 25% 12%;
 
-    --primary: 150 70% 40%;
+    --primary: 9 100% 64%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 15% 92%;
     --secondary-foreground: 230 20% 25%;
@@ -25,19 +25,19 @@
     --destructive-foreground: 0 0% 100%;
     --border: 220 15% 88%;
     --input: 220 15% 88%;
-    --ring: 150 70% 40%;
+    --ring: 9 100% 64%;
     --radius: 0.75rem;
 
     --sidebar-background: 230 20% 11%;
     --sidebar-foreground: 60 10% 92%;
-    --sidebar-primary: 150 70% 40%;
-    --sidebar-primary-foreground: 230 25% 7%;
+    --sidebar-primary: 9 100% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 230 15% 18%;
     --sidebar-accent-foreground: 60 10% 92%;
     --sidebar-border: 230 15% 18%;
-    --sidebar-ring: 150 70% 40%;
+    --sidebar-ring: 9 100% 64%;
 
-    --timer-glow: 150 70% 40%;
+    --timer-glow: 9 100% 64%;
     --timer-warn: 30 90% 60%;
     --timer-danger: 0 72% 55%;
   }
@@ -50,8 +50,8 @@
     --popover: 230 20% 11%;
     --popover-foreground: 60 10% 92%;
 
-    --primary: 150 80% 55%;
-    --primary-foreground: 230 25% 7%;
+    --primary: 9 90% 65%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 230 15% 18%;
     --secondary-foreground: 60 10% 85%;
     --muted: 230 15% 15%;
@@ -62,36 +62,36 @@
     --destructive-foreground: 60 10% 92%;
     --border: 230 15% 18%;
     --input: 230 15% 18%;
-    --ring: 150 80% 55%;
+    --ring: 9 90% 65%;
 
     --sidebar-background: 230 20% 11%;
     --sidebar-foreground: 60 10% 92%;
-    --sidebar-primary: 150 80% 55%;
-    --sidebar-primary-foreground: 230 25% 7%;
+    --sidebar-primary: 9 90% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 230 15% 18%;
     --sidebar-accent-foreground: 60 10% 92%;
     --sidebar-border: 230 15% 18%;
-    --sidebar-ring: 150 80% 55%;
+    --sidebar-ring: 9 90% 65%;
 
-    --timer-glow: 150 80% 55%;
+    --timer-glow: 9 90% 65%;
   }
 
-  /* ===== EMERALD ===== */
-  .theme-emerald {
-    --primary: 150 70% 40%;
+  /* ===== TOMATO ===== */
+  .theme-tomato {
+    --primary: 9 100% 64%;
     --primary-foreground: 0 0% 100%;
-    --ring: 150 70% 40%;
-    --timer-glow: 150 70% 40%;
-    --sidebar-primary: 150 70% 40%;
-    --sidebar-ring: 150 70% 40%;
+    --ring: 9 100% 64%;
+    --timer-glow: 9 100% 64%;
+    --sidebar-primary: 9 100% 64%;
+    --sidebar-ring: 9 100% 64%;
   }
-  .dark.theme-emerald {
-    --primary: 150 80% 55%;
-    --primary-foreground: 230 25% 7%;
-    --ring: 150 80% 55%;
-    --timer-glow: 150 80% 55%;
-    --sidebar-primary: 150 80% 55%;
-    --sidebar-ring: 150 80% 55%;
+  .dark.theme-tomato {
+    --primary: 9 90% 65%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 9 90% 65%;
+    --timer-glow: 9 90% 65%;
+    --sidebar-primary: 9 90% 65%;
+    --sidebar-ring: 9 90% 65%;
   }
 
   /* ===== OCEAN ===== */

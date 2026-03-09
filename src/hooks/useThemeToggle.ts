@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
-export type ColorTheme = "emerald" | "ocean" | "sunset" | "violet" | "rose" | "amber";
+export type ColorTheme = "tomato" | "ocean" | "sunset" | "violet" | "rose" | "amber";
 
 const THEME_KEY = "studyflow_theme";
 const COLOR_KEY = "studyflow_color";
-const THEME_CLASSES: ColorTheme[] = ["emerald", "ocean", "sunset", "violet", "rose", "amber"];
+const THEME_CLASSES: ColorTheme[] = ["tomato", "ocean", "sunset", "violet", "rose", "amber"];
 
 export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string }> = {
-  emerald: { label: "Emerald", preview: "hsl(150 70% 40%)" },
+  tomato: { label: "Tomato", preview: "hsl(9 100% 64%)" },
   ocean: { label: "Ocean", preview: "hsl(210 70% 45%)" },
   sunset: { label: "Sunset", preview: "hsl(15 75% 48%)" },
   violet: { label: "Violet", preview: "hsl(270 60% 50%)" },
@@ -22,9 +22,9 @@ const THEME_VALUES: Record<
     dark: { primary: string; primaryForeground: string };
   }
 > = {
-  emerald: {
-    light: { primary: "150 70% 40%", primaryForeground: "0 0% 100%" },
-    dark: { primary: "150 80% 55%", primaryForeground: "230 25% 7%" },
+  tomato: {
+    light: { primary: "9 100% 64%", primaryForeground: "0 0% 100%" },
+    dark: { primary: "9 90% 65%", primaryForeground: "0 0% 100%" },
   },
   ocean: {
     light: { primary: "210 70% 45%", primaryForeground: "0 0% 100%" },
@@ -61,7 +61,7 @@ function getInitialColor(): ColorTheme {
     const stored = localStorage.getItem(COLOR_KEY);
     if (stored && stored in COLOR_THEMES) return stored as ColorTheme;
   } catch {}
-  return "emerald";
+  return "tomato";
 }
 
 export function useThemeToggle() {
