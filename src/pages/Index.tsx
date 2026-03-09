@@ -50,6 +50,7 @@ const Index = () => {
   const [catVisible, setCatVisible] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showSkiGame, setShowSkiGame] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
 
   useReminders({ isRunning: timer.isRunning });
