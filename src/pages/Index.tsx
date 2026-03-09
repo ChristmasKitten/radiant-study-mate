@@ -365,6 +365,13 @@ const Index = () => {
           <p className="text-center text-[10px] text-muted-foreground mt-1">Selecting "Flow" skips your break and starts a new focus session immediately.</p>
         </DialogContent>
       </Dialog>
+      
+      {!hideChrome && (
+        <footer className="mt-auto py-6 text-center text-xs text-muted-foreground/60 w-full max-w-md">
+          <p>Cultivating focus, one session at a time.</p>
+          <p className="mt-1">Pomidor &copy; {new Date().getFullYear()}</p>
+        </footer>
+      )}
     </div>
   );
 };
