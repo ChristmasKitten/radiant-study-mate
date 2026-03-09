@@ -28,6 +28,7 @@ import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import logoUrl from "@/assets/logo.png";
 
 type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
