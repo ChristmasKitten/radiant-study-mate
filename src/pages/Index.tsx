@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { BookOpen, BarChart3, ListTodo, FileText, CalendarDays } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
@@ -26,6 +27,8 @@ import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
 import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 import { CosmeticsShop } from "@/components/CosmeticsShop";
+import { CsvExportImport } from "@/components/CsvExportImport";
+import { SkiingCatGame } from "@/components/SkiingCatGame";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
