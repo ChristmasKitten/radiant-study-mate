@@ -89,6 +89,7 @@ const Index = () => {
             mode={timer.mode}
             isRunning={timer.isRunning}
             studyStyle={timer.studyStyle}
+            currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
           />
 
           <TimerControls
@@ -218,6 +219,7 @@ const Index = () => {
                 mode={timer.mode}
                 isRunning={timer.isRunning}
                 studyStyle={timer.studyStyle}
+                currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
               />
               <p className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Move mouse or press a key to return
@@ -255,6 +257,7 @@ const Index = () => {
                 mode={timer.mode}
                 isRunning={timer.isRunning}
                 studyStyle={timer.studyStyle}
+                currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
               />
 
               <TimerControls

@@ -1,4 +1,5 @@
 import { StudyStyle, TimerMode } from "@/hooks/useStudyTimer";
+import { Badge } from "@/components/ui/badge";
 
 interface CircularTimerProps {
   timeLeft: number;
@@ -6,6 +7,7 @@ interface CircularTimerProps {
   mode: TimerMode;
   isRunning: boolean;
   studyStyle?: StudyStyle;
+  currentFocusDurationMinutes?: number;
 }
 
 function getEndTime(secondsLeft: number): string {
@@ -13,7 +15,7 @@ function getEndTime(secondsLeft: number): string {
   return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic" }: CircularTimerProps) {
+export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic", currentFocusDurationMinutes }: CircularTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
@@ -77,6 +79,11 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle 
         <span className="mt-1 text-xs text-muted-foreground">
           {statusLabel}
         </span>
+        {studyStyle === "progressive" && mode === "focus" && currentFocusDurationMinutes && (
+          <Badge variant="secondary" className="mt-3 text-[10px] font-medium">
+            Target: {currentFocusDurationMinutes} min
+          </Badge>
+        )}
       </div>
     </div>
   );
