@@ -8,7 +8,7 @@ import { useGamification } from "@/hooks/useGamification";
 import { useExamCountdown } from "@/hooks/useExamCountdown";
 import { useReminders } from "@/hooks/useReminders";
 import { toast } from "@/hooks/use-toast";
-import { fireSessionComplete, fireLevelUp } from "@/lib/celebrations";
+import { fireSessionComplete, fireLevelUp, fireBadgeUnlock } from "@/lib/celebrations";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";

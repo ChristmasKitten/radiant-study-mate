@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Lock, Check } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
+import { fireItemUnlock } from "@/lib/celebrations";
+import { toast } from "@/hooks/use-toast";
 
 export const SHOP_ITEMS = [
   { id: "cat_hat_party", category: "cat_accessory", name: "Party Hat", emoji: "🥳", cost: 100 },
@@ -68,7 +70,11 @@ export function CosmeticsShop() {
                     variant={canAfford ? "default" : "secondary"}
                     className="w-full h-7 text-[10px]"
                     disabled={!canAfford}
-                    onClick={() => unlockItem(item.id, item.cost)}
+                    onClick={() => {
+                      unlockItem(item.id, item.cost);
+                      fireItemUnlock();
+                      toast({ title: `${item.emoji} Unlocked!`, description: `You got ${item.name}!` });
+                    }}
                   >
                     {canAfford ? (
                       "Unlock"
@@ -90,7 +96,7 @@ export function CosmeticsShop() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground">
           <ShoppingBag className="h-4 w-4" />
         </Button>
       </DialogTrigger>
