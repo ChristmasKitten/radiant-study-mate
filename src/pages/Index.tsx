@@ -254,6 +254,7 @@ const Index = () => {
                 progress={timer.progress}
                 mode={timer.mode}
                 isRunning={timer.isRunning}
+                studyStyle={timer.studyStyle}
               />
 
               <TimerControls
