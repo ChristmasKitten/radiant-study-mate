@@ -34,7 +34,7 @@ type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
 const Index = () => {
   // Build marker to ensure Publish detects a real bundle change
-  const buildId = "2026-03-09-02";
+  const buildId = "2026-03-09-03";
 
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
