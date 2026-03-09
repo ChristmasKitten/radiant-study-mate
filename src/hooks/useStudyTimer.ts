@@ -31,6 +31,7 @@ interface PersistedData {
   customDurations: CustomDurations;
   todayDate: string;
   studyStyle: StudyStyle;
+  dailyGoal: number;
 }
 
 interface TimerState {
@@ -49,6 +50,7 @@ interface TimerState {
   studyStyle: StudyStyle;
   pausesCount: number;
   lastFocusScore: number | null;
+  dailyGoal: number;
 }
 
 const DEFAULT_DURATIONS: CustomDurations = {
@@ -127,6 +129,7 @@ export function useStudyTimer() {
     studyStyle,
     pausesCount: 0,
     lastFocusScore: null,
+    dailyGoal: persisted.dailyGoal ?? 120,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -143,8 +146,9 @@ export function useStudyTimer() {
       customDurations: state.customDurations,
       todayDate: state.todayDate,
       studyStyle: state.studyStyle,
+      dailyGoal: state.dailyGoal,
     });
-  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds, state.dailyRecords, state.customDurations, state.todayDate, state.studyStyle]);
+  }, [state.sessionsCompleted, state.totalFocusTime, state.subjects, state.subjectTimes, state.allTimeTotalSeconds, state.dailyRecords, state.customDurations, state.todayDate, state.studyStyle, state.dailyGoal]);
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -372,6 +376,10 @@ export function useStudyTimer() {
     ? state.dailyRecords.reduce((sum, d) => sum + d.totalSeconds, 0) / state.dailyRecords.length
     : 0;
 
+  const setDailyGoal = useCallback((goal: number) => {
+    setState((prev) => ({ ...prev, dailyGoal: goal }));
+  }, []);
+
   return {
     ...state,
     progress,
@@ -389,5 +397,6 @@ export function useStudyTimer() {
     avgDailyTime,
     currentFocusDurationMinutes,
     lastFocusScore: state.lastFocusScore,
+    setDailyGoal,
   };
 }
