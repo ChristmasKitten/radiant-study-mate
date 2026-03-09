@@ -57,8 +57,12 @@ function randomTarget(maxX: number): number {
 
 export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
   const { equippedItems } = useGamification();
+  const equippedHatId = equippedItems["cat_hat"];
   const equippedAccessoryId = equippedItems["cat_accessory"];
+  const equippedSkinId = equippedItems["cat_skin"];
+  const equippedHat = SHOP_ITEMS.find((i) => i.id === equippedHatId)?.emoji;
   const equippedAccessory = SHOP_ITEMS.find((i) => i.id === equippedAccessoryId)?.emoji;
+  const equippedSkin = SHOP_ITEMS.find((i) => i.id === equippedSkinId)?.emoji;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [cat, setCat] = useState<CatState>(() => ({
