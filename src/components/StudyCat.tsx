@@ -185,9 +185,14 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
             className="text-2xl inline-block"
             style={{ transform: cat.direction === "left" ? "scaleX(-1)" : "scaleX(1)" }}
           >
-            {catEmoji}
+             {catEmoji}
+            {equippedHat && (
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-base drop-shadow-sm z-10">
+                {equippedHat}
+              </span>
+            )}
             {equippedAccessory && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg drop-shadow-sm z-10">
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs drop-shadow-sm z-10">
                 {equippedAccessory}
               </span>
             )}
