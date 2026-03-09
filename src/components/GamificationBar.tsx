@@ -3,6 +3,7 @@ import { Flame, Star, Trophy, Zap, Award } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge as BadgeType } from "@/hooks/useGamification";
 import { toast } from "@/hooks/use-toast";
+import { fireBadgeUnlock } from "@/lib/celebrations";
 
 interface GamificationBarProps {
   xp: number;
@@ -37,6 +38,7 @@ export function GamificationBar({
 
   useEffect(() => {
     if (newBadges.length > 0) {
+      fireBadgeUnlock();
       newBadges.forEach((id) => {
         const badge = [...unlockedBadges, ...lockedBadges].find((b) => b.id === id);
         if (badge) {
