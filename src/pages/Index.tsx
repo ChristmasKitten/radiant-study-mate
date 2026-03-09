@@ -107,6 +107,7 @@ const Index = () => {
   if (focusMode) {
     return (
       <div
+        data-build={buildId}
         className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
         onClick={(e) => {
           if (e.target === e.currentTarget) setFocusMode(false);
@@ -140,7 +141,7 @@ const Index = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
+    <div data-build={buildId} className="flex min-h-screen flex-col items-center bg-background px-4 py-6 selection:bg-primary/30">
       {!hideChrome && (
         <header className="mb-6 flex w-full max-w-md flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
