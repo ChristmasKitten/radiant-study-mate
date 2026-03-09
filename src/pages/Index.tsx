@@ -142,8 +142,8 @@ const Index = () => {
         <header className="mb-6 flex w-full max-w-md flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <BookOpen className="h-4 w-4 text-primary" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+                <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
               </div>
               <h1 
                 className="truncate text-xl font-bold tracking-tight text-foreground cursor-pointer select-none"
