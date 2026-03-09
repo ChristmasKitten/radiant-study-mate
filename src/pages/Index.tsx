@@ -118,7 +118,7 @@ const Index = () => {
                 <BookOpen className="h-4 w-4 text-primary" />
               </div>
               <h1 className="truncate text-xl font-bold tracking-tight text-foreground">
-                Study<span className="text-primary">Flow</span>
+                Pomi<span className="text-primary">dor</span>
               </h1>
             </div>
 
