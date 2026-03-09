@@ -24,6 +24,7 @@ import { WeeklyReport } from "@/components/WeeklyReport";
 import { StudyCat } from "@/components/StudyCat";
 import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
+import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 
 import { Button } from "@/components/ui/button";
 
