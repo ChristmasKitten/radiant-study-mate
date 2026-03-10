@@ -12,6 +12,7 @@ interface StudyCatProps {
   isRunning?: boolean;
   mode?: "focus" | "shortBreak" | "longBreak";
   totalFocusTime?: number;
+  onCatClick?: () => void;
 }
 
 interface CatState {
@@ -55,7 +56,7 @@ function randomTarget(maxX: number): number {
   return 20 + Math.random() * Math.max(maxX - 40, 100);
 }
 
-export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
+export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0, onCatClick }: StudyCatProps) {
   const { equippedItems } = useGamification();
   const equippedHatId = equippedItems["cat_hat"];
   const equippedAccessoryId = equippedItems["cat_accessory"];
@@ -77,6 +78,7 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
   const mood = getMood(isRunning, mode, totalFocusTime);
   const speed = mood === "sleepy" ? 0.6 : mood === "happy" ? 1.8 : 1.2;
 
+  // Pick a new random target when cat reaches current target
   useEffect(() => {
     if (!visible) return;
     let animId: number;
@@ -90,14 +92,28 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
         lastTime = time;
         setCat((prev) => {
           if (prev.action !== "walking") return prev;
+
           const maxX = (containerRef.current?.offsetWidth ?? window.innerWidth) - 40;
           const dist = prev.targetX - prev.x;
+
+          // Reached target? Pick new random one and maybe pause
           if (Math.abs(dist) < 2) {
             const newTarget = randomTarget(maxX);
-            return { ...prev, targetX: newTarget, direction: newTarget > prev.x ? "right" : "left" };
+            return {
+              ...prev,
+              targetX: newTarget,
+              direction: newTarget > prev.x ? "right" : "left",
+            };
           }
+
           const dir = dist > 0 ? 1 : -1;
-          return { ...prev, x: prev.x + dir * speed, direction: dir > 0 ? "right" : "left" };
+          const newX = prev.x + dir * speed;
+
+          return {
+            ...prev,
+            x: newX,
+            direction: dir > 0 ? "right" : "left",
+          };
         });
       }
       animId = requestAnimationFrame(move);
@@ -107,6 +123,7 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     return () => cancelAnimationFrame(animId);
   }, [visible, speed]);
 
+  // Random sit/sleep with new random target after
   useEffect(() => {
     if (!visible) return;
     const scheduleAction = () => {
@@ -148,6 +165,14 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     }, 2000);
   }, []);
 
+  const handleCatClick = useCallback(() => {
+    if (onCatClick) {
+      onCatClick();
+    } else {
+      handlePet();
+    }
+  }, [onCatClick, handlePet]);
+
   if (!visible) return null;
 
   const catEmoji = equippedSkin || getMoodEmoji(mood, cat.action);
@@ -157,23 +182,38 @@ export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = fa
     <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-14 pointer-events-none z-50">
       <div
         className="absolute bottom-1 pointer-events-auto cursor-pointer select-none"
-        style={{ transform: `translateX(${cat.x}px)`, transition: "transform 0.05s linear" }}
-        onClick={handlePet}
+        style={{
+          transform: `translateX(${cat.x}px)`,
+          transition: "transform 0.05s linear",
+        }}
+        onClick={handleCatClick}
         title="Pet me! 🐱"
       >
         <div className="relative">
-          <span className="text-2xl inline-block" style={{ transform: cat.direction === "left" ? "scaleX(-1)" : "scaleX(1)" }}>
-            {catEmoji}
+          <span
+            className="text-2xl inline-block"
+            style={{ transform: cat.direction === "left" ? "scaleX(-1)" : "scaleX(1)" }}
+          >
+             {catEmoji}
             {equippedHat && (
-              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-base drop-shadow-sm z-10">{equippedHat}</span>
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-base drop-shadow-sm z-10">
+                {equippedHat}
+              </span>
             )}
             {equippedAccessory && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs drop-shadow-sm z-10">{equippedAccessory}</span>
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs drop-shadow-sm z-10">
+                {equippedAccessory}
+              </span>
             )}
           </span>
 
-          {bubble && <span className="absolute -top-4 -right-2 text-[10px] animate-pulse">{bubble}</span>}
-          {cat.action === "sleeping" && <span className="absolute -top-4 -right-2 text-[10px] text-muted-foreground animate-pulse">💤</span>}
+          {bubble && (
+            <span className="absolute -top-4 -right-2 text-[10px] animate-pulse">{bubble}</span>
+          )}
+
+          {cat.action === "sleeping" && (
+            <span className="absolute -top-4 -right-2 text-[10px] text-muted-foreground animate-pulse">💤</span>
+          )}
 
           <AnimatePresence>
             {hearts && (

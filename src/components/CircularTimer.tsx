@@ -9,7 +9,6 @@ interface CircularTimerProps {
   studyStyle?: StudyStyle;
   currentFocusDurationMinutes?: number;
   lastFocusScore?: number | null;
-  large?: boolean;
 }
 
 function getEndTime(secondsLeft: number): string {
@@ -17,13 +16,13 @@ function getEndTime(secondsLeft: number): string {
   return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic", currentFocusDurationMinutes, lastFocusScore, large }: CircularTimerProps) {
+export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle = "classic", currentFocusDurationMinutes, lastFocusScore }: CircularTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const size = large ? 400 : 300;
-  const strokeWidth = large ? 10 : 8;
+  const size = 300;
+  const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
@@ -34,32 +33,65 @@ export function CircularTimer({ timeLeft, progress, mode, isRunning, studyStyle 
 
   const modeLabel = studyStyle === "freeStudy"
     ? "Free Study"
-    : mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break";
+    : mode === "focus"
+      ? "Focus"
+      : mode === "shortBreak"
+        ? "Short Break"
+        : "Long Break";
 
   const statusLabel = studyStyle === "freeStudy"
     ? (isRunning ? "tracking elapsed time" : "ready to track")
     : (isRunning ? `ends at ${getEndTime(timeLeft)}` : "paused");
 
-  const timeClass = large ? "text-8xl" : "text-6xl";
-
   return (
     <div className="relative flex items-center justify-center">
       <svg width={size} height={size} className="relative transform -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} opacity={0.5} />
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} style={{ transition: "stroke-dashoffset 0.5s ease-out" }} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="hsl(var(--border))"
+          strokeWidth={strokeWidth}
+          opacity={0.5}
+        />
+
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
+        />
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`${timeClass} font-bold tracking-tight ${colorClass}`}>{formatted}</span>
-        <span className="mt-2 text-sm text-muted-foreground">{modeLabel}</span>
-        <span className="mt-1 text-xs text-muted-foreground">{statusLabel}</span>
+        <span className={`text-6xl font-bold tracking-tight ${colorClass}`}>
+          {formatted}
+        </span>
+        <span className="mt-2 text-sm text-muted-foreground">
+          {modeLabel}
+        </span>
+        <span className="mt-1 text-xs text-muted-foreground">
+          {statusLabel}
+        </span>
         {studyStyle === "progressive" && mode === "focus" && currentFocusDurationMinutes && (
-          <Badge variant="secondary" className="mt-3 text-[10px] font-medium">Target: {currentFocusDurationMinutes} min</Badge>
+          <Badge variant="secondary" className="mt-3 text-[10px] font-medium">
+            Target: {currentFocusDurationMinutes} min
+          </Badge>
         )}
         {mode !== "focus" && lastFocusScore !== undefined && lastFocusScore !== null && (
-          <Badge variant="secondary" className="mt-3 text-[10px] font-medium text-primary bg-primary/10">Focus Score: {lastFocusScore}%</Badge>
+          <Badge variant="secondary" className="mt-3 text-[10px] font-medium text-primary bg-primary/10">
+            Focus Score: {lastFocusScore}%
+          </Badge>
         )}
       </div>
     </div>
   );
 }
+

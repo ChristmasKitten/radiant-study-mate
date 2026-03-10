@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { BarChart3, FileText, CalendarDays } from "lucide-react";
+import { BookOpen, BarChart3, ListTodo, FileText, CalendarDays } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
@@ -8,9 +8,8 @@ import { useInactivityMode } from "@/hooks/useInactivityMode";
 import { useGamification } from "@/hooks/useGamification";
 import { useExamCountdown } from "@/hooks/useExamCountdown";
 import { useReminders } from "@/hooks/useReminders";
-import { useScheduleReminders } from "@/hooks/useScheduleReminders";
 import { toast } from "@/hooks/use-toast";
-import { fireSessionComplete, fireLevelUp } from "@/lib/celebrations";
+import { fireSessionComplete, fireLevelUp, fireBadgeUnlock } from "@/lib/celebrations";
 import { CircularTimer } from "@/components/CircularTimer";
 import { TimerControls } from "@/components/TimerControls";
 import { ModeSelector } from "@/components/ModeSelector";
@@ -28,8 +27,8 @@ import { AmbientMusic } from "@/components/AmbientMusic";
 import { StudySchedule } from "@/components/StudySchedule";
 import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 import { CosmeticsShop } from "@/components/CosmeticsShop";
+import { CsvExportImport } from "@/components/CsvExportImport";
 import { SkiingCatGame } from "@/components/SkiingCatGame";
-import { TimelineView } from "@/components/TimelineView";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -38,7 +37,8 @@ import logoUrl from "@/assets/logo.png";
 type View = "timer" | "analytics" | "tasks" | "report" | "schedule";
 
 const Index = () => {
-  const buildId = "2026-03-10-01";
+  // Build marker to ensure Publish detects a real bundle change
+  const buildId = "2026-03-09-03";
 
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
@@ -54,18 +54,6 @@ const Index = () => {
   const [logoClicks, setLogoClicks] = useState(0);
 
   useReminders({ isRunning: timer.isRunning });
-
-  const handleScheduleStart = useCallback((subject: string, durationMinutes: number) => {
-    if (!timer.subjects.includes(subject)) timer.addSubject(subject);
-    timer.setCurrentSubject(subject);
-    timer.setCustomDurations({ ...timer.customDurations, focus: durationMinutes });
-    timer.setMode("focus");
-    setView("timer");
-    toast({ title: "⏱️ Session started!", description: `${subject} — ${durationMinutes} min focus` });
-    setTimeout(() => timer.start(), 200);
-  }, [timer]);
-
-  useScheduleReminders({ onStartSession: handleScheduleStart });
 
   const pendingForCurrent = taskList.pendingCount(timer.currentSubject);
   const inactivityMode = useInactivityMode({
@@ -85,6 +73,7 @@ const Index = () => {
   useEffect(() => {
     const handler = () => {
       fireSessionComplete();
+      
       const prevLevel = prevLevelRef.current;
       gamification.awardSessionXP();
       setTimeout(() => {
@@ -94,12 +83,15 @@ const Index = () => {
         }
         prevLevelRef.current = gamification.level;
       }, 100);
+
       setShowRating(true);
     };
 
     const breakCompleteHandler = () => {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Break's over!", { body: "Time to start your next focus session." });
+        new Notification("Break's over!", {
+          body: "Time to start your next focus session.",
+        });
       }
       toast({ title: "Break's over!", description: "Time to start your next focus session." });
     };
@@ -112,11 +104,22 @@ const Index = () => {
     };
   }, [gamification]);
 
-  const handleStart = () => timer.start();
-
-  const handleFinishFreeStudy = () => {
-    timer.finishFreeStudy();
+  const handleStart = () => {
+    timer.start();
   };
+
+  const handleScheduleStart = useCallback((subject: string, durationMinutes: number) => {
+    // Add subject if not exists, select it, set custom focus duration, switch to timer view, start
+    if (!timer.subjects.includes(subject)) {
+      timer.addSubject(subject);
+    }
+    timer.setCurrentSubject(subject);
+    timer.setCustomDurations({ ...timer.customDurations, focus: durationMinutes });
+    timer.setMode("focus");
+    setView("timer");
+    toast({ title: "⏱️ Session started!", description: `${subject} — ${durationMinutes} min focus` });
+    setTimeout(() => timer.start(), 200);
+  }, [timer]);
 
   // Fullscreen focus mode
   if (focusMode) {
@@ -124,7 +127,9 @@ const Index = () => {
       <div
         data-build={buildId}
         className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
-        onClick={(e) => { if (e.target === e.currentTarget) setFocusMode(false); }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setFocusMode(false);
+        }}
       >
         <div className="flex flex-col items-center gap-6">
           <CircularTimer
@@ -135,7 +140,6 @@ const Index = () => {
             studyStyle={timer.studyStyle}
             currentFocusDurationMinutes={timer.currentFocusDurationMinutes}
             lastFocusScore={timer.lastFocusScore}
-            large
           />
 
           <TimerControls
@@ -143,8 +147,6 @@ const Index = () => {
             onStart={handleStart}
             onPause={timer.pause}
             onReset={timer.reset}
-            showFinish={timer.studyStyle === "freeStudy" && timer.freeStudyElapsed > 0}
-            onFinish={handleFinishFreeStudy}
           />
 
           <p className="text-xs text-muted-foreground/40">
@@ -165,7 +167,7 @@ const Index = () => {
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 overflow-hidden cursor-pointer" onClick={() => setView("timer")}>
                 <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
               </div>
-              <h1
+              <h1 
                 className="truncate text-xl font-bold tracking-tight text-foreground select-none"
                 onClick={() => setLogoClicks(c => c >= 20 ? 0 : c + 1)}
               >
@@ -189,6 +191,7 @@ const Index = () => {
                 onClearNewBadges={gamification.clearNewBadges}
               />
               <CosmeticsShop />
+              <CsvExportImport />
               <AmbientMusic />
               <SettingsPanel
                 durations={timer.customDurations}
@@ -202,7 +205,6 @@ const Index = () => {
                 onDailyGoalChange={timer.setDailyGoal}
                 open={isSettingsOpen}
                 onOpenChange={setIsSettingsOpen}
-                onSkiGame={() => setShowSkiGame(true)}
               />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
             </div>
@@ -265,6 +267,7 @@ const Index = () => {
         </div>
       )}
 
+
       {view === "timer" && (
         <div className={`flex w-full flex-col items-center ${inactivityMode ? "min-h-[72vh] justify-center" : ""}`}>
           {inactivityMode ? (
@@ -284,8 +287,17 @@ const Index = () => {
             </div>
           ) : (
             <div className="flex w-full flex-col items-center gap-4">
-              <StudyStyleSelector currentStyle={timer.studyStyle} onStyleChange={timer.setStudyStyle} />
-              <ModeSelector currentMode={timer.mode} onModeChange={timer.setMode} disableBreakModes={timer.studyStyle === "freeStudy"} />
+              <StudyStyleSelector
+                currentStyle={timer.studyStyle}
+                onStyleChange={timer.setStudyStyle}
+              />
+
+              <ModeSelector
+                currentMode={timer.mode}
+                onModeChange={timer.setMode}
+                disableBreakModes={timer.studyStyle === "freeStudy"}
+              />
+
               <SubjectSelector
                 subjects={timer.subjects}
                 currentSubject={timer.currentSubject}
@@ -297,6 +309,7 @@ const Index = () => {
                 onColorChange={gamification.setSubjectColor}
                 palette={gamification.palette}
               />
+
 
               <CircularTimer
                 timeLeft={timer.timeLeft}
@@ -314,8 +327,6 @@ const Index = () => {
                 onPause={timer.pause}
                 onReset={timer.reset}
                 onFocusMode={() => setFocusMode(true)}
-                showFinish={timer.studyStyle === "freeStudy" && timer.freeStudyElapsed > 0}
-                onFinish={handleFinishFreeStudy}
               />
 
               <SessionStats
@@ -329,12 +340,6 @@ const Index = () => {
                 currentStreak={gamification.currentStreak}
                 dailyGoal={timer.dailyGoal}
                 onTodayClick={() => setIsSettingsOpen(true)}
-              />
-
-              <TimelineView
-                totalFocusTime={timer.totalFocusTime}
-                subjectTimes={timer.subjectTimes}
-                getSubjectColor={gamification.getSubjectColor}
               />
 
               <ExamCountdown
@@ -355,12 +360,12 @@ const Index = () => {
         </div>
       )}
 
-      <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} />
-
+      <StudyCat visible={catVisible} onHide={() => setCatVisible(false)} isRunning={timer.isRunning} mode={timer.mode} totalFocusTime={timer.totalFocusTime} onCatClick={() => setShowSkiGame(true)} />
+      
       <AnimatePresence>
         {showSkiGame && <SkiingCatGame onClose={() => setShowSkiGame(false)} />}
       </AnimatePresence>
-
+      
       <Dialog open={showRating} onOpenChange={setShowRating}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -388,7 +393,7 @@ const Index = () => {
           <p className="text-center text-[10px] text-muted-foreground mt-1">Selecting "Flow" skips your break and starts a new focus session immediately.</p>
         </DialogContent>
       </Dialog>
-
+      
       {!hideChrome && (
         <footer className="mt-auto pt-10 pb-4 text-center text-xs text-muted-foreground/60 w-full max-w-md">
           <p>Cultivating focus, one session at a time.</p>
