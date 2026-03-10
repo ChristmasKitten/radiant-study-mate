@@ -51,6 +51,7 @@ interface TimerState {
   pausesCount: number;
   lastFocusScore: number | null;
   dailyGoal: number;
+  freeStudyElapsed: number; // tracks only focus time in free study (excludes pauses)
 }
 
 const DEFAULT_DURATIONS: CustomDurations = {
@@ -106,7 +107,6 @@ export function useStudyTimer() {
   const persisted = loadPersistedData();
   const today = getToday();
 
-  // Reset today's stats if date changed
   const isNewDay = persisted.todayDate !== today;
 
   const durations = persisted.customDurations ?? DEFAULT_DURATIONS;
@@ -130,11 +130,11 @@ export function useStudyTimer() {
     pausesCount: 0,
     lastFocusScore: null,
     dailyGoal: persisted.dailyGoal ?? 120,
+    freeStudyElapsed: 0,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Persist on changes
   useEffect(() => {
     savePersistedData({
       sessionsCompleted: state.sessionsCompleted,
@@ -162,7 +162,8 @@ export function useStudyTimer() {
       intervalRef.current = setInterval(() => {
         setState((prev) => {
           if (prev.studyStyle === "freeStudy") {
-            return { ...prev, timeLeft: prev.timeLeft + 1 };
+            // In free study, timeLeft counts up for display, freeStudyElapsed tracks actual focus time
+            return { ...prev, timeLeft: prev.timeLeft + 1, freeStudyElapsed: prev.freeStudyElapsed + 1 };
           }
 
           if (prev.timeLeft <= 1) {
@@ -177,7 +178,6 @@ export function useStudyTimer() {
               ? newSessions % 4 === 0 ? "longBreak" : "shortBreak"
               : "focus";
 
-            // Update subject time
             let newSubjectTimes = [...prev.subjectTimes];
             if (wasFocus) {
               const idx = newSubjectTimes.findIndex((s) => s.subject === prev.currentSubject);
@@ -192,7 +192,6 @@ export function useStudyTimer() {
               }
             }
 
-            // Update daily record
             let newDailyRecords = [...prev.dailyRecords];
             if (wasFocus) {
               const todayStr = getToday();
@@ -208,7 +207,6 @@ export function useStudyTimer() {
               }
             }
 
-            // Play sound
             try {
               const ctx = new AudioContext();
               const osc = ctx.createOscillator();
@@ -221,7 +219,6 @@ export function useStudyTimer() {
               osc.stop(ctx.currentTime + 0.3);
             } catch {}
 
-            // Notify listeners (for celebrations)
             if (wasFocus) {
               window.dispatchEvent(new CustomEvent("studyflow:session-complete"));
             } else {
@@ -273,6 +270,62 @@ export function useStudyTimer() {
         mode: nextMode,
         timeLeft: getModeDurationSeconds(nextMode, prev.studyStyle, prev.customDurations, prev.sessionsCompleted),
         isRunning: false,
+        freeStudyElapsed: 0,
+      };
+    });
+  }, []);
+
+  // Finish free study session: logs elapsed focus time (not break time)
+  const finishFreeStudy = useCallback(() => {
+    setState((prev) => {
+      if (prev.studyStyle !== "freeStudy" || prev.freeStudyElapsed < 1) return prev;
+
+      const elapsed = prev.freeStudyElapsed;
+      const newSessions = prev.sessionsCompleted + 1;
+      const newTotal = prev.totalFocusTime + elapsed;
+      const newAllTime = prev.allTimeTotalSeconds + elapsed;
+
+      // Update subject time
+      let newSubjectTimes = [...prev.subjectTimes];
+      const idx = newSubjectTimes.findIndex((s) => s.subject === prev.currentSubject);
+      if (idx >= 0) {
+        newSubjectTimes[idx] = {
+          ...newSubjectTimes[idx],
+          totalSeconds: newSubjectTimes[idx].totalSeconds + elapsed,
+          sessions: newSubjectTimes[idx].sessions + 1,
+        };
+      } else {
+        newSubjectTimes.push({ subject: prev.currentSubject, totalSeconds: elapsed, sessions: 1 });
+      }
+
+      // Update daily record
+      let newDailyRecords = [...prev.dailyRecords];
+      const todayStr = getToday();
+      const dayIdx = newDailyRecords.findIndex((d) => d.date === todayStr);
+      if (dayIdx >= 0) {
+        newDailyRecords[dayIdx] = {
+          ...newDailyRecords[dayIdx],
+          totalSeconds: newDailyRecords[dayIdx].totalSeconds + elapsed,
+          sessions: newDailyRecords[dayIdx].sessions + 1,
+        };
+      } else {
+        newDailyRecords.push({ date: todayStr, totalSeconds: elapsed, sessions: 1 });
+      }
+
+      window.dispatchEvent(new CustomEvent("studyflow:session-complete"));
+
+      return {
+        ...prev,
+        isRunning: false,
+        timeLeft: 0,
+        sessionsCompleted: newSessions,
+        totalFocusTime: newTotal,
+        allTimeTotalSeconds: newAllTime,
+        subjectTimes: newSubjectTimes,
+        dailyRecords: newDailyRecords,
+        freeStudyElapsed: 0,
+        pausesCount: 0,
+        lastFocusScore: Math.max(40, 100 - prev.pausesCount * 5),
       };
     });
   }, []);
@@ -298,6 +351,7 @@ export function useStudyTimer() {
         mode: nextMode,
         timeLeft: getModeDurationSeconds(nextMode, studyStyleValue, prev.customDurations, prev.sessionsCompleted),
         isRunning: false,
+        freeStudyElapsed: 0,
       };
     });
   }, []);
@@ -354,7 +408,6 @@ export function useStudyTimer() {
     state.sessionsCompleted,
   );
 
-  // Computed analytics
   const bestDayRecord = state.dailyRecords.reduce<DailyRecord | null>(
     (best, day) => (!best || day.totalSeconds > best.totalSeconds ? day : best),
     null,
@@ -386,6 +439,7 @@ export function useStudyTimer() {
     start,
     pause,
     reset,
+    finishFreeStudy,
     setMode,
     setStudyStyle,
     setCurrentSubject,
