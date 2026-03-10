@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const STORAGE_KEY = "studyflow_schedule";
+
 interface ScheduleBlock {
   id: string;
   subject: string;
@@ -9,9 +12,6 @@ interface ScheduleBlock {
   endTime: string;
   repeating: boolean;
 }
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const STORAGE_KEY = "studyflow_schedule";
 
 function loadSchedule(): ScheduleBlock[] {
   try {
@@ -48,16 +48,12 @@ export function useScheduleReminders({ onStartSession }: UseScheduleRemindersPro
 
           toast({
             title: `📚 Time for ${block.subject}!`,
-            description: `Scheduled: ${block.startTime} – ${block.endTime}`,
-            action: onStartSession ? (
-              <button
-                className="rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground font-medium"
-                onClick={() => onStartSession(block.subject, duration > 0 ? duration : 25)}
-              >
-                Start Now
-              </button>
-            ) as any : undefined,
+            description: `Scheduled: ${block.startTime} – ${block.endTime}. Click to start!`,
           });
+
+          if (onStartSession) {
+            onStartSession(block.subject, duration > 0 ? duration : 25);
+          }
 
           if ("Notification" in window && Notification.permission === "granted") {
             new Notification(`Time for ${block.subject}!`, {
@@ -68,8 +64,8 @@ export function useScheduleReminders({ onStartSession }: UseScheduleRemindersPro
       }
     };
 
-    const interval = setInterval(check, 30_000); // check every 30s
-    check(); // initial check
+    const interval = setInterval(check, 30_000);
+    check();
     return () => clearInterval(interval);
   }, [onStartSession]);
 }
