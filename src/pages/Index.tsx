@@ -294,6 +294,7 @@ const Index = () => {
                 onSelect={timer.setCurrentSubject}
                 onAdd={timer.addSubject}
                 onRemove={timer.removeSubject}
+                onReorder={timer.reorderSubjects}
                 disabled={timer.isRunning}
                 getSubjectColor={gamification.getSubjectColor}
                 onColorChange={gamification.setSubjectColor}
