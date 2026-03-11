@@ -136,15 +136,18 @@ export function useGamification() {
       }
 
       const bonus = streak > 1 ? XP_STREAK_BONUS * Math.min(streak, 10) : 0;
-      const newXP = prev.xp + XP_PER_SESSION + bonus;
+      const earned = XP_PER_SESSION + bonus;
+      const newXP = prev.xp + earned;
+      const newTotalEarned = (prev.totalXpEarned || 0) + earned;
       let newLevel = prev.level;
-      while (newXP >= xpForLevel(newLevel)) {
+      while (newTotalEarned >= xpForLevel(newLevel)) {
         newLevel++;
       }
 
       const updated: GamificationData = {
         ...prev,
         xp: newXP,
+        totalXpEarned: newTotalEarned,
         level: newLevel,
         currentStreak: streak,
         longestStreak: Math.max(prev.longestStreak, streak),
