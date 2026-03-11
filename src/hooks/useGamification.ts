@@ -61,7 +61,7 @@ export const ALL_BADGES: Badge[] = [
 function loadData(): GamificationData {
   const defaultData = {
     xp: 0,
-    level: 1,
+    totalXpEarned: 0,
     currentStreak: 0,
     longestStreak: 0,
     lastStudyDate: null,
