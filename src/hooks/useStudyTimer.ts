@@ -381,6 +381,25 @@ export function useStudyTimer() {
     });
   }, []);
 
+  const reorderSubjects = useCallback((newOrder: string[]) => {
+    setState((prev) => ({ ...prev, subjects: newOrder }));
+  }, []);
+
+  const deleteSession = useCallback((date: string) => {
+    setState((prev) => {
+      const record = prev.dailyRecords.find((d) => d.date === date);
+      if (!record) return prev;
+      const isToday = date === getToday();
+      return {
+        ...prev,
+        dailyRecords: prev.dailyRecords.filter((d) => d.date !== date),
+        allTimeTotalSeconds: prev.allTimeTotalSeconds - record.totalSeconds,
+        totalFocusTime: isToday ? 0 : prev.totalFocusTime,
+        sessionsCompleted: isToday ? 0 : prev.sessionsCompleted,
+      };
+    });
+  }, []);
+
   const setCustomDurations = useCallback((newDurations: CustomDurations) => {
     setState((prev) => ({
       ...prev,
