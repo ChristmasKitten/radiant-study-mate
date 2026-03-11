@@ -30,6 +30,7 @@ import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 import { CosmeticsShop } from "@/components/CosmeticsShop";
 import { SkiingCatGame } from "@/components/SkiingCatGame";
 import { TimelineView } from "@/components/TimelineView";
+import { RealTimeClock } from "@/components/RealTimeClock";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -173,7 +174,8 @@ const Index = () => {
               </h1>
             </div>
 
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
+              <RealTimeClock />
               <GamificationBar
                 xp={gamification.xp}
                 level={gamification.level}
@@ -292,6 +294,7 @@ const Index = () => {
                 onSelect={timer.setCurrentSubject}
                 onAdd={timer.addSubject}
                 onRemove={timer.removeSubject}
+                onReorder={timer.reorderSubjects}
                 disabled={timer.isRunning}
                 getSubjectColor={gamification.getSubjectColor}
                 onColorChange={gamification.setSubjectColor}
@@ -328,7 +331,9 @@ const Index = () => {
                 subjectTimes={timer.subjectTimes}
                 currentStreak={gamification.currentStreak}
                 dailyGoal={timer.dailyGoal}
+                dailyRecords={timer.dailyRecords}
                 onTodayClick={() => setIsSettingsOpen(true)}
+                onDeleteSession={timer.deleteSession}
               />
 
               <TimelineView

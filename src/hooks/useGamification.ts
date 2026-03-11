@@ -12,6 +12,7 @@ export interface Badge {
 
 export interface GamificationData {
   xp: number;
+  totalXpEarned: number;
   level: number;
   currentStreak: number;
   longestStreak: number;
@@ -58,8 +59,9 @@ export const ALL_BADGES: Badge[] = [
 ];
 
 function loadData(): GamificationData {
-  const defaultData = {
+  const defaultData: GamificationData = {
     xp: 0,
+    totalXpEarned: 0,
     level: 1,
     currentStreak: 0,
     longestStreak: 0,
@@ -134,15 +136,18 @@ export function useGamification() {
       }
 
       const bonus = streak > 1 ? XP_STREAK_BONUS * Math.min(streak, 10) : 0;
-      const newXP = prev.xp + XP_PER_SESSION + bonus;
+      const earned = XP_PER_SESSION + bonus;
+      const newXP = prev.xp + earned;
+      const newTotalEarned = (prev.totalXpEarned || 0) + earned;
       let newLevel = prev.level;
-      while (newXP >= xpForLevel(newLevel)) {
+      while (newTotalEarned >= xpForLevel(newLevel)) {
         newLevel++;
       }
 
       const updated: GamificationData = {
         ...prev,
         xp: newXP,
+        totalXpEarned: newTotalEarned,
         level: newLevel,
         currentStreak: streak,
         longestStreak: Math.max(prev.longestStreak, streak),
@@ -163,7 +168,8 @@ export function useGamification() {
 
   const clearNewBadges = useCallback(() => setNewBadges([]), []);
 
-  const xpInCurrentLevel = data.xp - (data.level > 1 ? xpForLevel(data.level - 1) : 0);
+  const totalEarned = data.totalXpEarned || data.xp;
+  const xpInCurrentLevel = totalEarned - (data.level > 1 ? xpForLevel(data.level - 1) : 0);
   const xpNeededForNext = xpForLevel(data.level) - (data.level > 1 ? xpForLevel(data.level - 1) : 0);
   const levelProgress = xpNeededForNext > 0 ? xpInCurrentLevel / xpNeededForNext : 0;
 
