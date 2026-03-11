@@ -331,7 +331,9 @@ const Index = () => {
                 subjectTimes={timer.subjectTimes}
                 currentStreak={gamification.currentStreak}
                 dailyGoal={timer.dailyGoal}
+                dailyRecords={timer.dailyRecords}
                 onTodayClick={() => setIsSettingsOpen(true)}
+                onDeleteSession={timer.deleteSession}
               />
 
               <TimelineView
