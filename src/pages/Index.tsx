@@ -30,6 +30,7 @@ import { StudyStyleSelector } from "@/components/StudyStyleSelector";
 import { CosmeticsShop } from "@/components/CosmeticsShop";
 import { SkiingCatGame } from "@/components/SkiingCatGame";
 import { TimelineView } from "@/components/TimelineView";
+import { RealTimeClock } from "@/components/RealTimeClock";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
