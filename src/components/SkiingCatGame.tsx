@@ -8,6 +8,7 @@ interface Obstacle {
   x: number;
   type: "rock" | "tree" | "ramp";
   height: number;
+  width: number;
 }
 
 interface GameState {
@@ -25,10 +26,12 @@ interface GameState {
   isFlipping: boolean;
 }
 
-const GRAVITY = 0.6;
-const JUMP_FORCE = -12;
+const GRAVITY = 0.5;
+const JUMP_FORCE = -11;
 const GROUND_Y = 200;
 const CAT_SIZE = 36;
+const CAT_HITBOX_W = 20;
+const CAT_HITBOX_H = 28;
 const GAME_WIDTH = 400;
 const GAME_HEIGHT = 300;
 
@@ -92,7 +95,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
     });
   }, []);
 
-  // Keyboard controls
   useEffect(() => {
     if (!started) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -109,7 +111,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [started, jump, doTrick]);
 
-  // Touch controls
   useEffect(() => {
     if (!started) return;
     const el = canvasRef.current;
@@ -141,7 +142,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
     };
   }, [started, jump, doTrick]);
 
-  // Game loop
   useEffect(() => {
     if (!started || game.gameOver) return;
 
@@ -156,7 +156,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
         let isFlipping = prev.isFlipping;
         let rotation = prev.rotation;
 
-        // Ground collision
         if (newY >= GROUND_Y) {
           newY = GROUND_Y;
           newVel = 0;
@@ -174,12 +173,10 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
           }
         }
 
-        // Move obstacles
         let obstacles = prev.obstacles.map((o) => ({ ...o, x: o.x - prev.speed })).filter((o) => o.x > -50);
 
-        // Spawn obstacles
         lastObstacleRef.current++;
-        if (lastObstacleRef.current > 60 + Math.random() * 40) {
+        if (lastObstacleRef.current > 80 + Math.random() * 50) {
           lastObstacleRef.current = 0;
           const types: Array<"rock" | "tree" | "ramp"> = ["rock", "tree", "ramp"];
           const type = types[Math.floor(Math.random() * types.length)];
@@ -187,25 +184,28 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             id: Date.now(),
             x: GAME_WIDTH + 20,
             type,
-            height: type === "ramp" ? 15 : type === "tree" ? 35 : 20,
+            height: type === "ramp" ? 12 : type === "tree" ? 30 : 18,
+            width: type === "tree" ? 20 : 24,
           });
         }
 
-        // Collision detection
+        // Collision - use smaller hitbox centered on cat
         let gameOver = false;
-        const catLeft = 60;
-        const catRight = catLeft + CAT_SIZE - 10;
-        const catBottom = newY + CAT_SIZE;
+        const catCenterX = 60 + CAT_SIZE / 2;
+        const catCenterY = newY + CAT_SIZE / 2;
+        const catLeft = catCenterX - CAT_HITBOX_W / 2;
+        const catRight = catCenterX + CAT_HITBOX_W / 2;
+        const catTop = catCenterY - CAT_HITBOX_H / 2;
+        const catBottom = catCenterY + CAT_HITBOX_H / 2;
 
         for (const obs of obstacles) {
-          const obsLeft = obs.x;
-          const obsRight = obs.x + 30;
+          const obsLeft = obs.x + 4;
+          const obsRight = obs.x + obs.width - 4;
           const obsTop = GROUND_Y + CAT_SIZE - obs.height;
 
-          if (catRight > obsLeft && catLeft < obsRight && catBottom > obsTop && newY + CAT_SIZE - 10 > obsTop) {
+          if (catRight > obsLeft && catLeft < obsRight && catBottom > obsTop + 4) {
             if (obs.type === "ramp" && isJumping) {
-              // Ramps give boost
-              newVel = JUMP_FORCE * 1.3;
+              newVel = JUMP_FORCE * 1.2;
             } else if (obs.type !== "ramp") {
               gameOver = true;
             }
@@ -213,7 +213,7 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
         }
 
         const newScore = prev.score + 1;
-        const newSpeed = 3 + Math.floor(newScore / 300) * 0.5;
+        const newSpeed = 3 + Math.floor(newScore / 400) * 0.5;
 
         let trickText = prev.trickText;
         let trickTimer = prev.trickTimer - 1;
@@ -235,7 +235,7 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
           isJumping,
           score: newScore,
           obstacles,
-          speed: Math.min(newSpeed, 8),
+          speed: Math.min(newSpeed, 7),
           gameOver,
           trickText,
           trickTimer,
@@ -290,25 +290,22 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
 
         <div
           ref={canvasRef}
-          className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-sky-200 to-white dark:from-sky-900 dark:to-background"
+          className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-sky-200 to-white dark:from-sky-900 dark:to-background mx-auto"
           style={{ width: "100%", height: GAME_HEIGHT + 60, maxWidth: GAME_WIDTH }}
         >
-          {/* Snow mountains bg */}
           <div className="absolute bottom-16 left-0 right-0 text-6xl text-center opacity-20 select-none pointer-events-none">
             🏔️🏔️🏔️
           </div>
 
-          {/* Ground / snow */}
           <div
             className="absolute left-0 right-0 bg-gradient-to-t from-blue-100 to-blue-50 dark:from-blue-950 dark:to-blue-900/50"
-            style={{ bottom: 0, height: 60 - 4 }}
+            style={{ bottom: 0, height: 56 }}
           />
           <div
             className="absolute left-0 right-0 border-t-2 border-blue-200 dark:border-blue-700"
             style={{ bottom: 56 }}
           />
 
-          {/* Score */}
           <div className="absolute top-3 left-3 flex items-center gap-3">
             <span className="text-xs font-bold text-foreground bg-background/60 rounded-full px-2 py-0.5">
               Score: {game.score}
@@ -325,7 +322,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             </span>
           </div>
 
-          {/* Trick text */}
           <AnimatePresence>
             {game.trickText && (
               <motion.div
@@ -339,9 +335,8 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             )}
           </AnimatePresence>
 
-          {/* Cat */}
           <div
-            className="absolute text-3xl select-none transition-none"
+            className="absolute text-3xl select-none"
             style={{
               left: 60,
               top: game.catY,
@@ -352,7 +347,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             🐱⛷️
           </div>
 
-          {/* Obstacles */}
           {game.obstacles.map((obs) => (
             <div
               key={obs.id}
@@ -366,7 +360,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             </div>
           ))}
 
-          {/* Start screen */}
           {!started && !game.gameOver && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm z-20">
               <span className="text-5xl mb-3">🐱⛷️</span>
@@ -380,7 +373,6 @@ export function SkiingCatGame({ onClose }: { onClose: () => void }) {
             </div>
           )}
 
-          {/* Game over */}
           {game.gameOver && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/70 backdrop-blur-sm z-20">
               <span className="text-4xl mb-2">😿</span>
