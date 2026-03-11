@@ -12,6 +12,7 @@ export interface Badge {
 
 export interface GamificationData {
   xp: number;
+  totalXpEarned: number;
   level: number;
   currentStreak: number;
   longestStreak: number;
