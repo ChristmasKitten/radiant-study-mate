@@ -471,5 +471,7 @@ export function useStudyTimer() {
     currentFocusDurationMinutes,
     lastFocusScore: state.lastFocusScore,
     setDailyGoal,
+    reorderSubjects,
+    deleteSession,
   };
 }
