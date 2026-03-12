@@ -272,6 +272,11 @@ const Index = () => {
             xp={gamification.xp}
             getSubjectColor={gamification.getSubjectColor}
           />
+          <TimelineView
+            totalFocusTime={timer.totalFocusTime}
+            subjectTimes={timer.subjectTimes}
+            getSubjectColor={gamification.getSubjectColor}
+          />
         </div>
       )}
 
