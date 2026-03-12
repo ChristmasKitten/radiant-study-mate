@@ -83,9 +83,23 @@ const Index = () => {
     }
   }, []);
 
+  // Apply equipped theme from shop
+  useEffect(() => {
+    const themeMap: Record<string, string> = {
+      theme_neon: "neon",
+      theme_ocean: "ocean",
+      theme_sunset: "sunset",
+    };
+    const equippedTheme = gamification.equippedItems["theme"];
+    if (equippedTheme && themeMap[equippedTheme]) {
+      setColor(themeMap[equippedTheme] as any);
+    }
+  }, [gamification.equippedItems, setColor]);
+
   useEffect(() => {
     const handler = () => {
-      fireSessionComplete();
+      const equippedCelebration = gamification.equippedItems["celebration"];
+      fireSessionComplete(equippedCelebration);
       const prevLevel = prevLevelRef.current;
       gamification.awardSessionXP();
       setTimeout(() => {

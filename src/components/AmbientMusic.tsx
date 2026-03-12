@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Music, X, Volume2, VolumeX, Link } from "lucide-react";
+import { Music, X, Volume2, VolumeX, Link, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useGamification } from "@/hooks/useGamification";
 
 interface Track {
   label: string;
   emoji: string;
   url: string;
+  premium?: string; // shop item ID required to unlock
 }
 
 const TRACKS: Track[] = [
@@ -16,6 +18,8 @@ const TRACKS: Track[] = [
   { label: "Lo-fi", emoji: "🎵", url: "https://cdn.pixabay.com/audio/2024/09/10/audio_6e5b7595c1.mp3" },
   { label: "Fireplace", emoji: "🔥", url: "https://cdn.pixabay.com/audio/2024/03/18/audio_2a44950332.mp3" },
   { label: "Ocean", emoji: "🌊", url: "https://cdn.pixabay.com/audio/2022/04/27/audio_67dce6b5f8.mp3" },
+  { label: "Premium Lo-Fi", emoji: "🎧", url: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1c0b1.mp3", premium: "sound_lofi_premium" },
+  { label: "Nature", emoji: "🌿✨", url: "https://cdn.pixabay.com/audio/2022/02/07/audio_3e4cfab6fa.mp3", premium: "sound_nature" },
 ];
 
 type NoiseColor = "white" | "pink" | "brown";
@@ -74,6 +78,7 @@ export function AmbientMusic() {
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeNoise, setActiveNoise] = useState<NoiseColor | null>(null);
+  const { unlockedItems } = useGamification();
   const [volume, setVolume] = useState(40);
   const [spotifyUrl, setSpotifyUrl] = useState(() => localStorage.getItem("studyflow_spotify") ?? "");
   const [spotifyInput, setSpotifyInput] = useState("");
@@ -222,20 +227,28 @@ export function AmbientMusic() {
 
             {/* Sound tracks */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              {TRACKS.map((track) => (
-                <button
-                  key={track.url}
-                  onClick={() => playTrack(track.url)}
-                  className={`flex flex-col items-center gap-1 rounded-xl p-3 transition-colors ${
-                    playing === track.url
-                      ? "bg-primary/10 border border-primary/30"
-                      : "border border-border hover:bg-secondary"
-                  }`}
-                >
-                  <span className="text-xl">{track.emoji}</span>
-                  <span className="text-[10px] text-muted-foreground">{track.label}</span>
-                </button>
-              ))}
+              {TRACKS.map((track) => {
+                const isLocked = track.premium && !unlockedItems.includes(track.premium);
+                return (
+                  <button
+                    key={track.url + (track.premium || "")}
+                    onClick={() => !isLocked && playTrack(track.url)}
+                    disabled={!!isLocked}
+                    className={`relative flex flex-col items-center gap-1 rounded-xl p-3 transition-colors ${
+                      isLocked
+                        ? "border border-border opacity-50 cursor-not-allowed"
+                        : playing === track.url
+                        ? "bg-primary/10 border border-primary/30"
+                        : "border border-border hover:bg-secondary"
+                    }`}
+                  >
+                    {isLocked && <Lock className="absolute top-1 right-1 h-2.5 w-2.5 text-muted-foreground" />}
+                    <span className="text-xl">{track.emoji}</span>
+                    <span className="text-[10px] text-muted-foreground">{track.label}</span>
+                    {isLocked && <span className="text-[8px] text-muted-foreground">Shop 🔒</span>}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Color noises */}
