@@ -10,27 +10,27 @@ interface TimelineViewProps {
 
 function formatTime(seconds: number) {
   const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
+  const m = Math.floor(seconds % 3600 / 60);
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
 
 export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: TimelineViewProps) {
   const sortedSubjects = useMemo(
-    () => [...subjectTimes].filter(s => s.totalSeconds > 0).sort((a, b) => b.totalSeconds - a.totalSeconds),
+    () => [...subjectTimes].filter((s) => s.totalSeconds > 0).sort((a, b) => b.totalSeconds - a.totalSeconds),
     [subjectTimes]
   );
 
   if (sortedSubjects.length === 0) {
     return (
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-4">
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-4 my-[9px]">
         <div className="flex items-center gap-2 mb-3">
           <Clock className="h-4 w-4 text-primary" />
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Where Did My Time Go?</p>
         </div>
         <p className="text-xs text-muted-foreground text-center py-4">Start studying to see your time breakdown!</p>
-      </div>
-    );
+      </div>);
+
   }
 
   const totalSec = Math.max(totalFocusTime, sortedSubjects.reduce((s, t) => s + t.totalSeconds, 0), 1);
@@ -53,7 +53,7 @@ export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: 
       {/* Subject breakdown bars */}
       <div className="space-y-2">
         {sortedSubjects.map((st) => {
-          const pct = (st.totalSeconds / totalSec) * 100;
+          const pct = st.totalSeconds / totalSec * 100;
           const color = getSubjectColor(st.subject);
           const isNone = color === "none";
           return (
@@ -74,12 +74,12 @@ export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: 
                   style={{
                     width: `${pct}%`,
                     backgroundColor: isNone ? "hsl(var(--primary))" : color,
-                    opacity: 0.7,
-                  }}
-                />
+                    opacity: 0.7
+                  }} />
+                
               </div>
-            </div>
-          );
+            </div>);
+
         })}
       </div>
 
@@ -94,11 +94,11 @@ export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: 
               <div
                 key={h}
                 className={`flex-1 h-4 rounded-sm transition-colors ${
-                  isCurrent ? "bg-primary/60 ring-1 ring-primary" : isPast ? "bg-secondary" : "bg-secondary/30"
-                }`}
-                title={`${String(h).padStart(2, "0")}:00`}
-              />
-            );
+                isCurrent ? "bg-primary/60 ring-1 ring-primary" : isPast ? "bg-secondary" : "bg-secondary/30"}`
+                }
+                title={`${String(h).padStart(2, "0")}:00`} />);
+
+
           })}
         </div>
         <div className="flex justify-between mt-1">
@@ -119,6 +119,6 @@ export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: 
           <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Subjects</p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
