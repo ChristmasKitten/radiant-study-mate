@@ -355,11 +355,6 @@ const Index = () => {
                 onDeleteSession={timer.deleteSession}
               />
 
-              <TimelineView
-                totalFocusTime={timer.totalFocusTime}
-                subjectTimes={timer.subjectTimes}
-                getSubjectColor={gamification.getSubjectColor}
-              />
 
               <ExamCountdown
                 exams={examCountdown.exams}
