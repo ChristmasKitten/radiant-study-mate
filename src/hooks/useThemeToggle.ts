@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-export type ColorTheme = "tomato" | "ocean" | "sunset" | "violet" | "rose" | "amber";
+export type ColorTheme = "tomato" | "ocean" | "sunset" | "violet" | "rose" | "amber" | "neon";
 
 const THEME_KEY = "studyflow_theme";
 const COLOR_KEY = "studyflow_color";
-const THEME_CLASSES: ColorTheme[] = ["tomato", "ocean", "sunset", "violet", "rose", "amber"];
+const THEME_CLASSES: ColorTheme[] = ["tomato", "ocean", "sunset", "violet", "rose", "amber", "neon"];
 
 export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string }> = {
   tomato: { label: "Tomato", preview: "hsl(9 100% 64%)" },
@@ -13,6 +13,7 @@ export const COLOR_THEMES: Record<ColorTheme, { label: string; preview: string }
   violet: { label: "Violet", preview: "hsl(270 60% 50%)" },
   rose: { label: "Rose", preview: "hsl(340 65% 47%)" },
   amber: { label: "Amber", preview: "hsl(40 80% 45%)" },
+  neon: { label: "Neon", preview: "hsl(160 100% 40%)" },
 };
 
 const THEME_VALUES: Record<
@@ -45,6 +46,10 @@ const THEME_VALUES: Record<
   amber: {
     light: { primary: "40 80% 45%", primaryForeground: "0 0% 100%" },
     dark: { primary: "40 90% 55%", primaryForeground: "230 25% 7%" },
+  },
+  neon: {
+    light: { primary: "160 100% 40%", primaryForeground: "0 0% 100%" },
+    dark: { primary: "160 100% 50%", primaryForeground: "230 25% 7%" },
   },
 };
 

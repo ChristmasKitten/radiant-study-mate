@@ -227,20 +227,28 @@ export function AmbientMusic() {
 
             {/* Sound tracks */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              {TRACKS.map((track) => (
-                <button
-                  key={track.url}
-                  onClick={() => playTrack(track.url)}
-                  className={`flex flex-col items-center gap-1 rounded-xl p-3 transition-colors ${
-                    playing === track.url
-                      ? "bg-primary/10 border border-primary/30"
-                      : "border border-border hover:bg-secondary"
-                  }`}
-                >
-                  <span className="text-xl">{track.emoji}</span>
-                  <span className="text-[10px] text-muted-foreground">{track.label}</span>
-                </button>
-              ))}
+              {TRACKS.map((track) => {
+                const isLocked = track.premium && !unlockedItems.includes(track.premium);
+                return (
+                  <button
+                    key={track.url + (track.premium || "")}
+                    onClick={() => !isLocked && playTrack(track.url)}
+                    disabled={!!isLocked}
+                    className={`relative flex flex-col items-center gap-1 rounded-xl p-3 transition-colors ${
+                      isLocked
+                        ? "border border-border opacity-50 cursor-not-allowed"
+                        : playing === track.url
+                        ? "bg-primary/10 border border-primary/30"
+                        : "border border-border hover:bg-secondary"
+                    }`}
+                  >
+                    {isLocked && <Lock className="absolute top-1 right-1 h-2.5 w-2.5 text-muted-foreground" />}
+                    <span className="text-xl">{track.emoji}</span>
+                    <span className="text-[10px] text-muted-foreground">{track.label}</span>
+                    {isLocked && <span className="text-[8px] text-muted-foreground">Shop 🔒</span>}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Color noises */}
