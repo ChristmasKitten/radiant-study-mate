@@ -273,6 +273,12 @@ const Index = () => {
             xp={gamification.xp}
             getSubjectColor={gamification.getSubjectColor}
           />
+          <FocusDNA
+            dailyRecords={timer.dailyRecords}
+            subjectTimes={timer.subjectTimes}
+            sessionsCompleted={timer.sessionsCompleted}
+            totalFocusTime={timer.totalFocusTime}
+          />
           <TimelineView
             totalFocusTime={timer.totalFocusTime}
             subjectTimes={timer.subjectTimes}
