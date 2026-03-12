@@ -136,7 +136,7 @@ export function SubjectSelector({
           </div>
         ) : (
           /* Normal mode: grid layout */
-          <div className="grid w-full grid-cols-2 gap-2">
+          <div className="grid w-full grid-cols-4 gap-2">
             {subjects.map((subject) => {
               const color = getSubjectColor?.(subject);
               const isActive = currentSubject === subject;
