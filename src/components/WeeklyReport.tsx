@@ -14,7 +14,7 @@ interface WeeklyReportProps {
 
 function formatTime(seconds: number) {
   const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
+  const m = Math.floor(seconds % 3600 / 60);
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
@@ -25,7 +25,7 @@ export function WeeklyReport({
   currentStreak,
   level,
   xp,
-  getSubjectColor,
+  getSubjectColor
 }: WeeklyReportProps) {
   const weekData = useMemo(() => {
     const days: DailyRecord[] = [];
@@ -42,7 +42,7 @@ export function WeeklyReport({
   const weekTotal = weekData.reduce((s, d) => s + d.totalSeconds, 0);
   const weekSessions = weekData.reduce((s, d) => s + d.sessions, 0);
   const avgPerDay = weekTotal / 7;
-  const bestDay = weekData.reduce((best, d) => (d.totalSeconds > best.totalSeconds ? d : best), weekData[0]);
+  const bestDay = weekData.reduce((best, d) => d.totalSeconds > best.totalSeconds ? d : best, weekData[0]);
   const activeDays = weekData.filter((d) => d.totalSeconds > 0).length;
 
   const prevWeekData = useMemo(() => {
@@ -57,7 +57,7 @@ export function WeeklyReport({
     return total;
   }, [dailyRecords]);
 
-  const trend = prevWeekData > 0 ? ((weekTotal - prevWeekData) / prevWeekData) * 100 : weekTotal > 0 ? 100 : 0;
+  const trend = prevWeekData > 0 ? (weekTotal - prevWeekData) / prevWeekData * 100 : weekTotal > 0 ? 100 : 0;
 
   return (
     <div className="w-full max-w-md space-y-3">
@@ -110,39 +110,39 @@ export function WeeklyReport({
       </div>
 
       {/* Subject breakdown with colors */}
-      {subjectTimes.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+      {subjectTimes.length > 0 &&
+      <div className="rounded-xl border border-border bg-card p-4 my-[12px]">
           <p className="mb-3 text-[10px] uppercase tracking-widest text-muted-foreground">Subject Breakdown</p>
           <div className="space-y-2.5">
-            {subjectTimes
-              .sort((a, b) => b.totalSeconds - a.totalSeconds)
-              .slice(0, 6)
-              .map((st) => {
-                const total = subjectTimes.reduce((s, t) => s + t.totalSeconds, 0);
-                const pct = total > 0 ? (st.totalSeconds / total) * 100 : 0;
-                const color = getSubjectColor(st.subject);
-                return (
-                  <div key={st.subject} className="flex items-center gap-3">
+            {subjectTimes.
+          sort((a, b) => b.totalSeconds - a.totalSeconds).
+          slice(0, 6).
+          map((st) => {
+            const total = subjectTimes.reduce((s, t) => s + t.totalSeconds, 0);
+            const pct = total > 0 ? st.totalSeconds / total * 100 : 0;
+            const color = getSubjectColor(st.subject);
+            return (
+              <div key={st.subject} className="flex items-center gap-3">
                     <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                     <span className="w-20 truncate text-xs font-medium text-foreground">{st.subject}</span>
                     <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
                       <motion.div
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: color }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.6 }}
-                      />
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: color }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.6 }} />
+                  
                     </div>
                     <span className="w-14 text-right font-mono text-[11px] text-muted-foreground">
                       {formatTime(st.totalSeconds)}
                     </span>
-                  </div>
-                );
-              })}
+                  </div>);
+
+          })}
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

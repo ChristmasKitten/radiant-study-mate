@@ -41,7 +41,7 @@ export function TimelineView({ totalFocusTime, subjectTimes, getSubjectColor }: 
   const currentHour = now.getHours();
 
   return (
-    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4 space-y-4">
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-4 space-y-4 my-[12px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary" />
