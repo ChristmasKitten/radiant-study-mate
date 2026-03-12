@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Music, X, Volume2, VolumeX, Link } from "lucide-react";
+import { Music, X, Volume2, VolumeX, Link, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useGamification } from "@/hooks/useGamification";
 
 interface Track {
   label: string;
   emoji: string;
   url: string;
+  premium?: string; // shop item ID required to unlock
 }
 
 const TRACKS: Track[] = [
@@ -16,6 +18,8 @@ const TRACKS: Track[] = [
   { label: "Lo-fi", emoji: "🎵", url: "https://cdn.pixabay.com/audio/2024/09/10/audio_6e5b7595c1.mp3" },
   { label: "Fireplace", emoji: "🔥", url: "https://cdn.pixabay.com/audio/2024/03/18/audio_2a44950332.mp3" },
   { label: "Ocean", emoji: "🌊", url: "https://cdn.pixabay.com/audio/2022/04/27/audio_67dce6b5f8.mp3" },
+  { label: "Premium Lo-Fi", emoji: "🎧", url: "https://cdn.pixabay.com/audio/2024/11/04/audio_4956b1c0b1.mp3", premium: "sound_lofi_premium" },
+  { label: "Nature", emoji: "🌿✨", url: "https://cdn.pixabay.com/audio/2022/02/07/audio_3e4cfab6fa.mp3", premium: "sound_nature" },
 ];
 
 type NoiseColor = "white" | "pink" | "brown";
