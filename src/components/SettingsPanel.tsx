@@ -27,7 +27,14 @@ interface SettingsPanelProps {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
   onSkiGame?: () => void;
+  unlockedItems?: string[];
 }
+
+const SHOP_THEME_MAP: Record<string, string> = {
+  neon: "theme_neon",
+  ocean: "theme_ocean",
+  sunset: "theme_sunset",
+};
 
 function getStorageData() {
   const keys = ["studyflow_data", "studyflow_tasks", "studyflow_schedule", "studyflow_gamification"];
