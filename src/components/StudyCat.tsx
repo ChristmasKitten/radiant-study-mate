@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationContext } from "@/contexts/GamificationContext";
 import { SHOP_ITEMS } from "@/components/CosmeticsShop";
 
 type CatMood = "happy" | "focused" | "sleepy" | "idle";
