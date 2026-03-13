@@ -227,6 +227,7 @@ const Index = () => {
                 open={isSettingsOpen}
                 onOpenChange={setIsSettingsOpen}
                 onSkiGame={() => setShowSkiGame(true)}
+                unlockedItems={gamification.unlockedItems}
               />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
             </div>
