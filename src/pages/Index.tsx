@@ -31,6 +31,7 @@ import { CosmeticsShop } from "@/components/CosmeticsShop";
 import { SkiingCatGame } from "@/components/SkiingCatGame";
 import { TimelineView } from "@/components/TimelineView";
 import { FocusDNA } from "@/components/FocusDNA";
+import { ManualTimeLog } from "@/components/ManualTimeLog";
 import { RealTimeClock } from "@/components/RealTimeClock";
 
 import { Button } from "@/components/ui/button";
@@ -250,7 +251,8 @@ const Index = () => {
       )}
 
       {view === "analytics" && (
-        <div className="flex w-full flex-col items-center">
+        <div className="flex w-full flex-col items-center gap-4">
+          <ManualTimeLog subjects={timer.subjects} onLog={timer.logManualTime} />
           <AnalyticsPanel
             dailyRecords={timer.dailyRecords}
             last7Days={timer.last7Days}
