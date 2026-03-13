@@ -113,7 +113,7 @@ function exportCSVs() {
   }
 }
 
-export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange, onSkiGame }: SettingsPanelProps) {
+export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange, onSkiGame, unlockedItems = [] }: SettingsPanelProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [local, setLocal] = useState(durations);
   const [localGoal, setLocalGoal] = useState(dailyGoal);
