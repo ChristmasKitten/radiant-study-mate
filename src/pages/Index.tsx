@@ -31,6 +31,7 @@ import { CosmeticsShop } from "@/components/CosmeticsShop";
 import { SkiingCatGame } from "@/components/SkiingCatGame";
 import { TimelineView } from "@/components/TimelineView";
 import { FocusDNA } from "@/components/FocusDNA";
+import { ManualTimeLog } from "@/components/ManualTimeLog";
 import { RealTimeClock } from "@/components/RealTimeClock";
 
 import { Button } from "@/components/ui/button";
