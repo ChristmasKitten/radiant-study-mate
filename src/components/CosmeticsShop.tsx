@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Lock, Check, Sparkles } from "lucide-react";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationContext } from "@/contexts/GamificationContext";
 import { fireItemUnlock } from "@/lib/celebrations";
 import { toast } from "@/hooks/use-toast";
 
