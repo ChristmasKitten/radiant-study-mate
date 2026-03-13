@@ -452,6 +452,51 @@ export function useStudyTimer() {
     setState((prev) => ({ ...prev, dailyGoal: goal }));
   }, []);
 
+  const logManualTime = useCallback((subject: string, minutes: number, date?: string) => {
+    const seconds = Math.round(minutes * 60);
+    if (seconds <= 0) return;
+    const targetDate = date || getToday();
+
+    setState((prev) => {
+      // Update subject times
+      let newSubjectTimes = [...prev.subjectTimes];
+      const idx = newSubjectTimes.findIndex((s) => s.subject === subject);
+      if (idx >= 0) {
+        newSubjectTimes[idx] = {
+          ...newSubjectTimes[idx],
+          totalSeconds: newSubjectTimes[idx].totalSeconds + seconds,
+          sessions: newSubjectTimes[idx].sessions + 1,
+        };
+      } else {
+        newSubjectTimes.push({ subject, totalSeconds: seconds, sessions: 1 });
+      }
+
+      // Update daily records
+      let newDailyRecords = [...prev.dailyRecords];
+      const dayIdx = newDailyRecords.findIndex((d) => d.date === targetDate);
+      if (dayIdx >= 0) {
+        newDailyRecords[dayIdx] = {
+          ...newDailyRecords[dayIdx],
+          totalSeconds: newDailyRecords[dayIdx].totalSeconds + seconds,
+          sessions: newDailyRecords[dayIdx].sessions + 1,
+        };
+      } else {
+        newDailyRecords.push({ date: targetDate, totalSeconds: seconds, sessions: 1 });
+      }
+
+      const isToday = targetDate === getToday();
+      return {
+        ...prev,
+        subjectTimes: newSubjectTimes,
+        dailyRecords: newDailyRecords,
+        allTimeTotalSeconds: prev.allTimeTotalSeconds + seconds,
+        totalFocusTime: isToday ? prev.totalFocusTime + seconds : prev.totalFocusTime,
+        sessionsCompleted: isToday ? prev.sessionsCompleted + 1 : prev.sessionsCompleted,
+        subjects: prev.subjects.includes(subject) ? prev.subjects : [...prev.subjects, subject],
+      };
+    });
+  }, []);
+
   return {
     ...state,
     progress,
