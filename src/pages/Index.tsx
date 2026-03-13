@@ -85,7 +85,7 @@ const Index = () => {
     }
   }, []);
 
-  // Apply equipped theme from shop
+  // Apply equipped theme from shop (or revert to tomato on unequip)
   useEffect(() => {
     const themeMap: Record<string, string> = {
       theme_neon: "neon",
@@ -95,6 +95,12 @@ const Index = () => {
     const equippedTheme = gamification.equippedItems["theme"];
     if (equippedTheme && themeMap[equippedTheme]) {
       setColor(themeMap[equippedTheme] as any);
+    } else if (!equippedTheme) {
+      // If no shop theme equipped, revert to default unless already on a free theme
+      const shopThemeValues = Object.values(themeMap);
+      if (shopThemeValues.includes(colorTheme)) {
+        setColor("tomato");
+      }
     }
   }, [gamification.equippedItems, setColor]);
 
