@@ -5,7 +5,7 @@ import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
 import { useInactivityMode } from "@/hooks/useInactivityMode";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationContext } from "@/contexts/GamificationContext";
 import { useExamCountdown } from "@/hooks/useExamCountdown";
 import { useReminders } from "@/hooks/useReminders";
 import { useScheduleReminders } from "@/hooks/useScheduleReminders";
