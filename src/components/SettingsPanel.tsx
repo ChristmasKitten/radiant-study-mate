@@ -27,7 +27,14 @@ interface SettingsPanelProps {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
   onSkiGame?: () => void;
+  unlockedItems?: string[];
 }
+
+const SHOP_THEME_MAP: Record<string, string> = {
+  neon: "theme_neon",
+  ocean: "theme_ocean",
+  sunset: "theme_sunset",
+};
 
 function getStorageData() {
   const keys = ["studyflow_data", "studyflow_tasks", "studyflow_schedule", "studyflow_gamification"];
@@ -106,7 +113,7 @@ function exportCSVs() {
   }
 }
 
-export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange, onSkiGame }: SettingsPanelProps) {
+export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColorChange, disabled, catVisible, onCatToggle, dailyGoal, onDailyGoalChange, open: controlledOpen, onOpenChange: controlledOnOpenChange, onSkiGame, unlockedItems = [] }: SettingsPanelProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [local, setLocal] = useState(durations);
   const [localGoal, setLocalGoal] = useState(dailyGoal);
@@ -222,15 +229,23 @@ export function SettingsPanel({ durations, onDurationsChange, colorTheme, onColo
             {(Object.keys(COLOR_THEMES) as ColorTheme[]).map((key) => {
               const theme = COLOR_THEMES[key];
               const isActive = key === colorTheme;
+              const shopItemId = SHOP_THEME_MAP[key];
+              const isLocked = shopItemId && !unlockedItems.includes(shopItemId);
               return (
                 <button
                   key={key}
-                  onClick={() => onColorChange(key)}
+                  onClick={() => !isLocked && onColorChange(key)}
+                  disabled={!!isLocked}
                   className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
-                    isActive ? "bg-secondary ring-2 ring-primary" : "hover:bg-secondary/50"
+                    isLocked
+                      ? "opacity-40 cursor-not-allowed"
+                      : isActive ? "bg-secondary ring-2 ring-primary" : "hover:bg-secondary/50"
                   }`}
+                  title={isLocked ? "Unlock in the shop" : theme.label}
                 >
-                  <div className="h-6 w-6 rounded-full shadow-sm" style={{ backgroundColor: theme.preview }} />
+                  <div className="h-6 w-6 rounded-full shadow-sm relative" style={{ backgroundColor: theme.preview }}>
+                    {isLocked && <span className="absolute inset-0 flex items-center justify-center text-[10px]">🔒</span>}
+                  </div>
                   <span className="text-[9px] text-muted-foreground">{theme.label}</span>
                 </button>
               );

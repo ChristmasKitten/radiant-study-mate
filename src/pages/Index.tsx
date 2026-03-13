@@ -5,7 +5,7 @@ import { useStudyTimer } from "@/hooks/useStudyTimer";
 import { useThemeToggle } from "@/hooks/useThemeToggle";
 import { useTaskList } from "@/hooks/useTaskList";
 import { useInactivityMode } from "@/hooks/useInactivityMode";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationContext } from "@/contexts/GamificationContext";
 import { useExamCountdown } from "@/hooks/useExamCountdown";
 import { useReminders } from "@/hooks/useReminders";
 import { useScheduleReminders } from "@/hooks/useScheduleReminders";
@@ -46,7 +46,7 @@ const Index = () => {
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
   const taskList = useTaskList();
-  const gamification = useGamification();
+  const gamification = useGamificationContext();
   const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
   const [focusMode, setFocusMode] = useState(false);
@@ -85,7 +85,7 @@ const Index = () => {
     }
   }, []);
 
-  // Apply equipped theme from shop
+  // Apply equipped theme from shop (or revert to tomato on unequip)
   useEffect(() => {
     const themeMap: Record<string, string> = {
       theme_neon: "neon",
@@ -95,6 +95,12 @@ const Index = () => {
     const equippedTheme = gamification.equippedItems["theme"];
     if (equippedTheme && themeMap[equippedTheme]) {
       setColor(themeMap[equippedTheme] as any);
+    } else if (!equippedTheme) {
+      // If no shop theme equipped, revert to default unless already on a free theme
+      const shopThemeValues = Object.values(themeMap);
+      if (shopThemeValues.includes(colorTheme)) {
+        setColor("tomato");
+      }
     }
   }, [gamification.equippedItems, setColor]);
 
@@ -221,6 +227,7 @@ const Index = () => {
                 open={isSettingsOpen}
                 onOpenChange={setIsSettingsOpen}
                 onSkiGame={() => setShowSkiGame(true)}
+                unlockedItems={gamification.unlockedItems}
               />
               <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
             </div>
