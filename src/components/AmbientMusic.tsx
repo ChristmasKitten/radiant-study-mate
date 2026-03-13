@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Music, X, Volume2, VolumeX, Link, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useGamification } from "@/hooks/useGamification";
+import { useGamificationContext } from "@/contexts/GamificationContext";
 
 interface Track {
   label: string;
