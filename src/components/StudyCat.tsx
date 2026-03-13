@@ -56,7 +56,7 @@ function randomTarget(maxX: number): number {
 }
 
 export const StudyCat = memo(function StudyCat({ visible, onHide, isRunning = false, mode = "focus", totalFocusTime = 0 }: StudyCatProps) {
-  const { equippedItems } = useGamification();
+  const { equippedItems } = useGamificationContext();
   const equippedHatId = equippedItems["cat_hat"];
   const equippedAccessoryId = equippedItems["cat_accessory"];
   const equippedSkinId = equippedItems["cat_skin"];

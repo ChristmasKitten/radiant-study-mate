@@ -78,7 +78,7 @@ export function AmbientMusic() {
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeNoise, setActiveNoise] = useState<NoiseColor | null>(null);
-  const { unlockedItems } = useGamification();
+  const { unlockedItems } = useGamificationContext();
   const [volume, setVolume] = useState(40);
   const [spotifyUrl, setSpotifyUrl] = useState(() => localStorage.getItem("studyflow_spotify") ?? "");
   const [spotifyInput, setSpotifyInput] = useState("");

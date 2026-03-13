@@ -46,7 +46,7 @@ const Index = () => {
   const timer = useStudyTimer();
   const { isDark, toggle: toggleTheme, colorTheme, setColor } = useThemeToggle();
   const taskList = useTaskList();
-  const gamification = useGamification();
+  const gamification = useGamificationContext();
   const examCountdown = useExamCountdown();
   const [view, setView] = useState<View>("timer");
   const [focusMode, setFocusMode] = useState(false);

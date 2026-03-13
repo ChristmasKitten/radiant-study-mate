@@ -68,7 +68,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export function CosmeticsShop() {
   const [open, setOpen] = useState(false);
-  const { xp, unlockedItems, equippedItems, unlockItem, equipItem } = useGamification();
+  const { xp, unlockedItems, equippedItems, unlockItem, equipItem } = useGamificationContext();
 
   const getCategoryItems = (category: string) =>
     SHOP_ITEMS.filter((i) => i.category === category).sort((a, b) => {
