@@ -518,5 +518,6 @@ export function useStudyTimer() {
     setDailyGoal,
     reorderSubjects,
     deleteSession,
+    logManualTime,
   };
 }

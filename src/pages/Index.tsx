@@ -250,7 +250,8 @@ const Index = () => {
       )}
 
       {view === "analytics" && (
-        <div className="flex w-full flex-col items-center">
+        <div className="flex w-full flex-col items-center gap-4">
+          <ManualTimeLog subjects={timer.subjects} onLog={timer.logManualTime} />
           <AnalyticsPanel
             dailyRecords={timer.dailyRecords}
             last7Days={timer.last7Days}
