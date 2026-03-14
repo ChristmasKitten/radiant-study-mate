@@ -189,7 +189,7 @@ const Index = () => {
                 <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
               </div>
               <h1
-                className="truncate text-xl font-bold tracking-tight text-foreground select-none"
+                className="hidden sm:block truncate text-xl font-bold tracking-tight text-foreground select-none"
                 onClick={() => setLogoClicks(c => c >= 20 ? 0 : c + 1)}
               >
                 {logoClicks >= 10 && logoClicks < 20 ? "🍅" : <>Pomi<span className="text-primary">dor</span></>}
