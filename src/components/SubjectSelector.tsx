@@ -133,6 +133,35 @@ export function SubjectSelector({
                 </div>
               );
             })}
+            {/* Add subject in edit mode */}
+            {isAdding ? (
+              <div className="flex items-center gap-1">
+                <Input
+                  value={newSubject}
+                  onChange={(e) => setNewSubject(e.target.value.slice(0, 30))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAdd();
+                    if (e.key === "Escape") setIsAdding(false);
+                  }}
+                  placeholder="Subject"
+                  className="h-8 flex-1 rounded-lg border-border bg-secondary text-sm"
+                  autoFocus
+                  disabled={disabled}
+                />
+                <Button size="sm" onClick={handleAdd} className="h-8 rounded-lg px-3 text-xs" disabled={!newSubject.trim() || disabled}>
+                  Add
+                </Button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAdding(true)}
+                className="flex h-9 w-full items-center justify-center rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary cursor-pointer"
+                type="button"
+              >
+                <Plus className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">Add Subject</span>
+              </button>
+            )}
           </div>
         ) : (
           /* Normal mode: grid layout */
