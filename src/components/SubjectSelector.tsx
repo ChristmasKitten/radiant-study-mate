@@ -248,36 +248,6 @@ export function SubjectSelector({
               );
             })}
 
-            {isAdding ? (
-              <div className="col-span-2 flex items-center justify-center gap-1">
-                <Input
-                  value={newSubject}
-                  onChange={(e) => setNewSubject(e.target.value.slice(0, 30))}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAdd();
-                    if (e.key === "Escape") setIsAdding(false);
-                  }}
-                  placeholder="Subject"
-                  className="h-8 w-28 rounded-full border-border bg-secondary text-sm"
-                  autoFocus
-                  disabled={disabled}
-                />
-                <Button size="sm" onClick={handleAdd} className="h-8 rounded-full px-3 text-xs" disabled={!newSubject.trim() || disabled}>
-                  Add
-                </Button>
-              </div>
-            ) : (
-              <button
-                onClick={() => !disabled && setIsAdding(true)}
-                className={`flex h-9 w-full items-center justify-center rounded-full border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary ${
-                  disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-                }`}
-                type="button"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">Add Subject</span>
-              </button>
-            )}
           </div>
         )}
       </div>
