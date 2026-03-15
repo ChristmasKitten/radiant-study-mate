@@ -33,6 +33,8 @@ import { TimelineView } from "@/components/TimelineView";
 import { FocusDNA } from "@/components/FocusDNA";
 import { ManualTimeLog } from "@/components/ManualTimeLog";
 import { RealTimeClock } from "@/components/RealTimeClock";
+import { BurnoutWarning } from "@/components/BurnoutWarning";
+import { useBurnoutWarning } from "@/hooks/useBurnoutWarning";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -57,6 +59,33 @@ const Index = () => {
   const [logoClicks, setLogoClicks] = useState(0);
 
   useReminders({ isRunning: timer.isRunning });
+
+  const burnout = useBurnoutWarning({
+    dailyRecords: timer.dailyRecords,
+    totalFocusTime: timer.totalFocusTime,
+    lastFocusScore: timer.lastFocusScore,
+    isRunning: timer.isRunning,
+  });
+
+  // Show toast on first burnout warning
+  const burnoutToastShownRef = useRef(false);
+  useEffect(() => {
+    if (burnout.warnings.length > 0 && !burnoutToastShownRef.current) {
+      burnoutToastShownRef.current = true;
+      toast({
+        title: "💛 Gentle reminder",
+        description: burnout.warnings[0].suggestion,
+      });
+    }
+    if (burnout.warnings.length === 0) burnoutToastShownRef.current = false;
+  }, [burnout.warnings]);
+
+  const handleReset = useCallback(() => {
+    if (timer.isRunning && timer.mode === "focus") {
+      burnout.trackQuit();
+    }
+    timer.reset();
+  }, [timer, burnout]);
 
   const handleScheduleStart = useCallback((subject: string, durationMinutes: number) => {
     if (!timer.subjects.includes(subject)) timer.addSubject(subject);
@@ -165,7 +194,7 @@ const Index = () => {
             isRunning={timer.isRunning}
             onStart={handleStart}
             onPause={timer.pause}
-            onReset={timer.reset}
+            onReset={handleReset}
             showFinish={timer.studyStyle === "freeStudy" && timer.freeStudyElapsed > 0}
             onFinish={handleFinishFreeStudy}
           />
@@ -256,6 +285,8 @@ const Index = () => {
           </div>
         </header>
       )}
+
+      <BurnoutWarning warnings={burnout.warnings} onDismiss={burnout.dismiss} />
 
       {view === "analytics" && (
         <div className="flex w-full flex-col items-center gap-4">
@@ -350,7 +381,7 @@ const Index = () => {
                 isRunning={timer.isRunning}
                 onStart={handleStart}
                 onPause={timer.pause}
-                onReset={timer.reset}
+                onReset={handleReset}
                 onFocusMode={() => setFocusMode(true)}
                 showFinish={timer.studyStyle === "freeStudy" && timer.freeStudyElapsed > 0}
                 onFinish={handleFinishFreeStudy}
@@ -370,7 +401,6 @@ const Index = () => {
                 onTodayClick={() => setIsSettingsOpen(true)}
                 onDeleteSession={timer.deleteSession}
               />
-
 
               <ExamCountdown
                 exams={examCountdown.exams}
