@@ -286,6 +286,8 @@ const Index = () => {
         </header>
       )}
 
+      <BurnoutWarning warnings={burnout.warnings} onDismiss={burnout.dismiss} />
+
       {view === "analytics" && (
         <div className="flex w-full flex-col items-center gap-4">
           <ManualTimeLog subjects={timer.subjects} onLog={timer.logManualTime} />
