@@ -194,7 +194,7 @@ const Index = () => {
             isRunning={timer.isRunning}
             onStart={handleStart}
             onPause={timer.pause}
-            onReset={timer.reset}
+            onReset={handleReset}
             showFinish={timer.studyStyle === "freeStudy" && timer.freeStudyElapsed > 0}
             onFinish={handleFinishFreeStudy}
           />
