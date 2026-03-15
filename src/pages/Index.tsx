@@ -33,6 +33,8 @@ import { TimelineView } from "@/components/TimelineView";
 import { FocusDNA } from "@/components/FocusDNA";
 import { ManualTimeLog } from "@/components/ManualTimeLog";
 import { RealTimeClock } from "@/components/RealTimeClock";
+import { BurnoutWarning } from "@/components/BurnoutWarning";
+import { useBurnoutWarning } from "@/hooks/useBurnoutWarning";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
