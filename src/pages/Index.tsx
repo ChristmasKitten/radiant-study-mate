@@ -400,6 +400,7 @@ const Index = () => {
                 onDeleteSession={timer.deleteSession}
               />
 
+      <BurnoutWarning warnings={burnout.warnings} onDismiss={burnout.dismiss} />
 
               <ExamCountdown
                 exams={examCountdown.exams}
