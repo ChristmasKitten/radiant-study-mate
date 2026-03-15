@@ -60,6 +60,33 @@ const Index = () => {
 
   useReminders({ isRunning: timer.isRunning });
 
+  const burnout = useBurnoutWarning({
+    dailyRecords: timer.dailyRecords,
+    totalFocusTime: timer.totalFocusTime,
+    lastFocusScore: timer.lastFocusScore,
+    isRunning: timer.isRunning,
+  });
+
+  // Show toast on first burnout warning
+  const burnoutToastShownRef = useRef(false);
+  useEffect(() => {
+    if (burnout.warnings.length > 0 && !burnoutToastShownRef.current) {
+      burnoutToastShownRef.current = true;
+      toast({
+        title: "💛 Gentle reminder",
+        description: burnout.warnings[0].suggestion,
+      });
+    }
+    if (burnout.warnings.length === 0) burnoutToastShownRef.current = false;
+  }, [burnout.warnings]);
+
+  const handleReset = useCallback(() => {
+    if (timer.isRunning && timer.mode === "focus") {
+      burnout.trackQuit();
+    }
+    timer.reset();
+  }, [timer, burnout]);
+
   const handleScheduleStart = useCallback((subject: string, durationMinutes: number) => {
     if (!timer.subjects.includes(subject)) timer.addSubject(subject);
     timer.setCurrentSubject(subject);
